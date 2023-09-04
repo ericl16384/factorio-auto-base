@@ -59,13 +59,24 @@ while pygame.get_init():
 
             n = base.get_node(x, y)
 
-            if n == base.UNTOUCHED:
-                pass
-            elif n == base.EMPTY:
+            if n != base.UNTOUCHED:
                 pygame.draw.rect(SCREEN, "dark grey", tile_area, rail_width)
-            elif n == base.CONTROL_LOGIC:
-                pygame.draw.rect(SCREEN, "red", node_area)
-                pygame.draw.rect(SCREEN, "dark grey", tile_area, rail_width)
+                if n == base.EMPTY:
+                    pass
+
+                elif n == base.CONTROL_LOGIC:
+                    pygame.draw.rect(SCREEN, "red", node_area)
+
+                elif n == base.CONTROL_LOGIC:
+                    pygame.draw.rect(SCREEN, "red", node_area)
+
+                elif n == base.MINE:
+                    pygame.draw.circle(SCREEN, "grey",
+                        (int(dx + TILE_DISPLAY_SIZE/2), int(dy + TILE_DISPLAY_SIZE/2)),
+                int(TILE_DISPLAY_SIZE / 4))
+
+                else:
+                    pygame.draw.rect(SCREEN, "purple", tile_area, rail_width*2)
 
     pygame.display.flip()
     

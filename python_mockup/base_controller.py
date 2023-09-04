@@ -94,19 +94,19 @@ class BaseController:
         # self.open_node_positions = []
         # self.queue_adjacent_node_positions(*base.start_pos)
 
-    def queue_adjacent_node_positions(self, x, y):
-        assert isinstance(x, int)
-        assert isinstance(y, int)
-        # pos = (x, self.y)
+    # def queue_adjacent_node_positions(self, x, y):
+    #     assert isinstance(x, int)
+    #     assert isinstance(y, int)
+    #     # pos = (x, self.y)
 
-        for p in (
-            (x + 1, self.y),
-            (x, self.y + 1),
-            (x - 1, self.y),
-            (x, self.y - 1)
-        ):
-            if self.base.get_node(*p) == self.base.UNTOUCHED and p not in self.open_node_positions:
-                self.open_node_positions.append(p)
+    #     for p in (
+    #         (x + 1, self.y),
+    #         (x, self.y + 1),
+    #         (x - 1, self.y),
+    #         (x, self.y - 1)
+    #     ):
+    #         if self.base.get_node(*p) == self.base.UNTOUCHED and p not in self.open_node_positions:
+    #             self.open_node_positions.append(p)
     
     def next(self):
         # assert len(self.open_node_positions)
@@ -116,4 +116,13 @@ class BaseController:
         # self.base.build_node(*p, self.base.EMPTY)
         # self.queue_adjacent_node_positions(*p)
 
-        self.base.build_node(*self.get_next_move.next()[0], self.base.EMPTY)
+        x, y = self.get_next_move.next()[0]
+
+        t = self.base.get_tile(x, y)
+
+        if t == self.base.map.IRON_ORE or t == self.base.map.COPPER_ORE:
+            n = self.base.MINE
+        else:
+            n = self.base.EMPTY
+
+        self.base.build_node(x, y, n)

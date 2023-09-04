@@ -47,8 +47,7 @@ class Base:
     EMPTY = "empty"
     CONTROL_LOGIC = "control logic"
 
-    IRON_MINE = "iron mine"
-    COPPER_MINE = "copper mine"
+    MINE = "mine"
 
     IRON_SMELTERY = "iron smeltery"
     COPPER_SMELTERY = "copper smeltery"
