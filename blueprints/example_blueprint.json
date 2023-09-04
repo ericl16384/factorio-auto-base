@@ -2,11 +2,79 @@
   "blueprint": {
     "entities": [
       {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 2
+              }
+            ]
+          }
+        },
         "entity_number": 1,
         "name": "constant-combinator",
         "position": {
           "x": 31.5,
-          "y": -27.5
+          "y": -32.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 1
+              },
+              {
+                "entity_id": 3
+              }
+            ]
+          }
+        },
+        "entity_number": 2,
+        "name": "constant-combinator",
+        "position": {
+          "x": 33.5,
+          "y": -32.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "green": [
+              {
+                "entity_id": 4
+              }
+            ],
+            "red": [
+              {
+                "entity_id": 2
+              }
+            ]
+          }
+        },
+        "entity_number": 3,
+        "name": "constant-combinator",
+        "position": {
+          "x": 35.5,
+          "y": -32.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "green": [
+              {
+                "entity_id": 3
+              }
+            ]
+          }
+        },
+        "entity_number": 4,
+        "name": "constant-combinator",
+        "position": {
+          "x": 37.5,
+          "y": -32.5
         }
       }
     ],

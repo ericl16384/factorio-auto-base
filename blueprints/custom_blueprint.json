@@ -2,12 +2,992 @@
   "blueprint": {
     "entities": [
       {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 2
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 3
+              }
+            ]
+          }
+        },
         "entity_number": 1,
         "name": "wooden-chest",
-        "position": [
-          25.5,
-          -28.5
-        ]
+        "position": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 1
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 4
+              }
+            ]
+          }
+        },
+        "entity_number": 2,
+        "name": "constant-combinator",
+        "position": {
+          "x": 1.5,
+          "y": 0.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 4
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 1
+              },
+              {
+                "entity_id": 5
+              }
+            ]
+          }
+        },
+        "entity_number": 3,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 1.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 3
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 2
+              },
+              {
+                "entity_id": 6
+              }
+            ]
+          }
+        },
+        "entity_number": 4,
+        "name": "constant-combinator",
+        "position": {
+          "x": 2.5,
+          "y": 1.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 6
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 3
+              },
+              {
+                "entity_id": 7
+              }
+            ]
+          }
+        },
+        "entity_number": 5,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 2.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 5
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 4
+              },
+              {
+                "entity_id": 8
+              }
+            ]
+          }
+        },
+        "entity_number": 6,
+        "name": "constant-combinator",
+        "position": {
+          "x": 3.5,
+          "y": 2.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 8
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 5
+              },
+              {
+                "entity_id": 9
+              }
+            ]
+          }
+        },
+        "entity_number": 7,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 3.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 7
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 6
+              },
+              {
+                "entity_id": 10
+              }
+            ]
+          }
+        },
+        "entity_number": 8,
+        "name": "constant-combinator",
+        "position": {
+          "x": 4.5,
+          "y": 3.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 10
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 7
+              },
+              {
+                "entity_id": 11
+              }
+            ]
+          }
+        },
+        "entity_number": 9,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 4.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 9
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 8
+              },
+              {
+                "entity_id": 12
+              }
+            ]
+          }
+        },
+        "entity_number": 10,
+        "name": "constant-combinator",
+        "position": {
+          "x": 5.5,
+          "y": 4.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 12
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 9
+              },
+              {
+                "entity_id": 13
+              }
+            ]
+          }
+        },
+        "entity_number": 11,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 5.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 11
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 10
+              },
+              {
+                "entity_id": 14
+              }
+            ]
+          }
+        },
+        "entity_number": 12,
+        "name": "constant-combinator",
+        "position": {
+          "x": 6.5,
+          "y": 5.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 14
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 11
+              },
+              {
+                "entity_id": 15
+              }
+            ]
+          }
+        },
+        "entity_number": 13,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 6.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 13
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 12
+              },
+              {
+                "entity_id": 16
+              }
+            ]
+          }
+        },
+        "entity_number": 14,
+        "name": "constant-combinator",
+        "position": {
+          "x": 7.5,
+          "y": 6.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 16
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 13
+              },
+              {
+                "entity_id": 17
+              }
+            ]
+          }
+        },
+        "entity_number": 15,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 7.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 15
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 14
+              },
+              {
+                "entity_id": 18
+              }
+            ]
+          }
+        },
+        "entity_number": 16,
+        "name": "constant-combinator",
+        "position": {
+          "x": 8.5,
+          "y": 7.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 18
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 15
+              },
+              {
+                "entity_id": 19
+              }
+            ]
+          }
+        },
+        "entity_number": 17,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 8.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 17
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 16
+              },
+              {
+                "entity_id": 20
+              }
+            ]
+          }
+        },
+        "entity_number": 18,
+        "name": "constant-combinator",
+        "position": {
+          "x": 9.5,
+          "y": 8.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 20
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 17
+              },
+              {
+                "entity_id": 21
+              }
+            ]
+          }
+        },
+        "entity_number": 19,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 9.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 19
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 18
+              },
+              {
+                "entity_id": 22
+              }
+            ]
+          }
+        },
+        "entity_number": 20,
+        "name": "constant-combinator",
+        "position": {
+          "x": 10.5,
+          "y": 9.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 22
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 19
+              },
+              {
+                "entity_id": 23
+              }
+            ]
+          }
+        },
+        "entity_number": 21,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 10.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 21
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 20
+              },
+              {
+                "entity_id": 24
+              }
+            ]
+          }
+        },
+        "entity_number": 22,
+        "name": "constant-combinator",
+        "position": {
+          "x": 11.5,
+          "y": 10.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 24
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 21
+              },
+              {
+                "entity_id": 25
+              }
+            ]
+          }
+        },
+        "entity_number": 23,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 11.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 23
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 22
+              },
+              {
+                "entity_id": 26
+              }
+            ]
+          }
+        },
+        "entity_number": 24,
+        "name": "constant-combinator",
+        "position": {
+          "x": 12.5,
+          "y": 11.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 26
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 23
+              },
+              {
+                "entity_id": 27
+              }
+            ]
+          }
+        },
+        "entity_number": 25,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 12.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 25
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 24
+              },
+              {
+                "entity_id": 28
+              }
+            ]
+          }
+        },
+        "entity_number": 26,
+        "name": "constant-combinator",
+        "position": {
+          "x": 13.5,
+          "y": 12.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 28
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 25
+              },
+              {
+                "entity_id": 29
+              }
+            ]
+          }
+        },
+        "entity_number": 27,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 13.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 27
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 26
+              },
+              {
+                "entity_id": 30
+              }
+            ]
+          }
+        },
+        "entity_number": 28,
+        "name": "constant-combinator",
+        "position": {
+          "x": 14.5,
+          "y": 13.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 30
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 27
+              },
+              {
+                "entity_id": 31
+              }
+            ]
+          }
+        },
+        "entity_number": 29,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 14.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 29
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 28
+              },
+              {
+                "entity_id": 32
+              }
+            ]
+          }
+        },
+        "entity_number": 30,
+        "name": "constant-combinator",
+        "position": {
+          "x": 15.5,
+          "y": 14.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 32
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 29
+              },
+              {
+                "entity_id": 33
+              }
+            ]
+          }
+        },
+        "entity_number": 31,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 15.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 31
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 30
+              },
+              {
+                "entity_id": 34
+              }
+            ]
+          }
+        },
+        "entity_number": 32,
+        "name": "constant-combinator",
+        "position": {
+          "x": 16.5,
+          "y": 15.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 34
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 31
+              },
+              {
+                "entity_id": 35
+              }
+            ]
+          }
+        },
+        "entity_number": 33,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 16.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 33
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 32
+              },
+              {
+                "entity_id": 36
+              }
+            ]
+          }
+        },
+        "entity_number": 34,
+        "name": "constant-combinator",
+        "position": {
+          "x": 17.5,
+          "y": 16.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 36
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 33
+              },
+              {
+                "entity_id": 37
+              }
+            ]
+          }
+        },
+        "entity_number": 35,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 17.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 35
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 34
+              },
+              {
+                "entity_id": 38
+              }
+            ]
+          }
+        },
+        "entity_number": 36,
+        "name": "constant-combinator",
+        "position": {
+          "x": 18.5,
+          "y": 17.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 38
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 35
+              },
+              {
+                "entity_id": 39
+              }
+            ]
+          }
+        },
+        "entity_number": 37,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 18.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 37
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 36
+              },
+              {
+                "entity_id": 40
+              }
+            ]
+          }
+        },
+        "entity_number": 38,
+        "name": "constant-combinator",
+        "position": {
+          "x": 19.5,
+          "y": 18.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 40
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 37
+              }
+            ]
+          }
+        },
+        "entity_number": 39,
+        "name": "wooden-chest",
+        "position": {
+          "x": 0.5,
+          "y": 19.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 39
+              }
+            ],
+            "green": [
+              {
+                "entity_id": 38
+              }
+            ]
+          }
+        },
+        "entity_number": 40,
+        "name": "constant-combinator",
+        "position": {
+          "x": 20.5,
+          "y": 19.5
+        }
       }
     ],
     "icons": [
