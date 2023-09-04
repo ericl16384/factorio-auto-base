@@ -1,0 +1,25 @@
+{
+  "blueprint": {
+    "entities": [
+      {
+        "entity_number": 1,
+        "name": "wooden-chest",
+        "position": {
+          "x": 25.5,
+          "y": -28.5
+        }
+      }
+    ],
+    "icons": [
+      {
+        "index": 1,
+        "signal": {
+          "name": "wooden-chest",
+          "type": "item"
+        }
+      }
+    ],
+    "item": "blueprint",
+    "version": 281479277379584
+  }
+}
