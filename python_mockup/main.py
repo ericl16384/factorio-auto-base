@@ -1,11 +1,12 @@
-import generate_map, base_controller
+import simulation, base_controller
 
 BASE_START = (7, 7)
 
 def reload():
-    global map, base
-    map = generate_map.Map()
-    base = base_controller.Base(map, *BASE_START)
+    global map, base, controller
+    map = simulation.Map()
+    base = simulation.Base(map, *BASE_START)
+    controller = base_controller.BaseController(base)
 reload()
 
 
@@ -78,4 +79,4 @@ while pygame.get_init():
                 reload()
             
             elif event.key == pygame.K_SPACE:
-                base.next()
+                controller.next()
