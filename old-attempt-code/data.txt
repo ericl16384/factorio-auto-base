@@ -1,0 +1,134 @@
+{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "type": "item",
+                    "name": "small-lamp"
+                },
+                "index": 1
+            }
+        ],
+        "entities": [
+            {
+                "entity_number": 1,
+                "name": "small-lamp",
+                "position": {
+                    "x": 35.5,
+                    "y": -45.5
+                },
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-0"
+                        },
+                        "constant": 0,
+                        "comparator": "="
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 2
+                            },
+                            {
+                                "entity_id": 4
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 2,
+                "name": "small-lamp",
+                "position": {
+                    "x": 34.5,
+                    "y": -45.5
+                },
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-0"
+                        },
+                        "constant": 0,
+                        "comparator": ">"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 3,
+                "name": "small-lamp",
+                "position": {
+                    "x": 37.5,
+                    "y": -45.5
+                },
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-0"
+                        },
+                        "second_signal": {
+                            "type": "virtual",
+                            "name": "signal-0"
+                        },
+                        "comparator": "="
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 4
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 4,
+                "name": "small-lamp",
+                "position": {
+                    "x": 36.5,
+                    "y": -45.5
+                },
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-anything"
+                        },
+                        "constant": 0,
+                        "comparator": ">"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 1
+                            },
+                            {
+                                "entity_id": 3
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "item": "blueprint",
+        "version": 281474976710656
+    }
+}
