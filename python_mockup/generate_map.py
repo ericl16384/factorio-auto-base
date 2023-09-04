@@ -13,7 +13,6 @@ class Map:
     def get_generated_tile(self, x, y):
         assert isinstance(x, int)
         assert isinstance(y, int)
-
         pos = (x, y)
 
         random.seed(f"{self.seed}{pos}")
