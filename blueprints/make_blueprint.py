@@ -49,19 +49,23 @@ class Blueprint:
         return encode_decode.encode(self.to_json(0))
 
 class Entity:
-    def __init__(self, name, position) -> None:
+    def __init__(self, name, x, y) -> None:
         self.name = name
-        self.position = position
+        self.x = x
+        self.y = y
     
     def to_dict(self):
-        return {"name": self.name, "position": self.position}
+        return {"name": self.name, "position": {
+            "x": self.x, "y": self.y
+        }}
 
-# class ConstantCombinator(Entity):
-#     def __init__(self, position) -> None:
-#         super().__init__("constant-combinator", position)
+class ConstantCombinator(Entity):
+    def __init__(self, x, y) -> None:
+        super().__init__("constant-combinator", x, y)
 
 blueprint = Blueprint()
-blueprint.entities.append(Entity("wooden-chest", (25.5, -28.5)))
+blueprint.entities.append(Entity("wooden-chest", 0.5, 0.5))
+blueprint.entities.append(ConstantCombinator(2.5, 0.5))
 
 print(blueprint.to_json())
 print(blueprint.to_encoded())
