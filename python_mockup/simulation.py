@@ -53,16 +53,26 @@ class Base:
     IRON_SMELTERY = "iron smeltery"
     COPPER_SMELTERY = "copper smeltery"
 
-    def __init__(self, map, start_x, start_y) -> None:
+    def __init__(self, map: Map, start_x, start_y) -> None:
         self.map = map
 
         assert isinstance(start_x, int)
         assert isinstance(start_y, int)
-        self.start_pos = (start_x, start_y)
+        
+        self.start_x = start_x
+        self.start_y = start_y
+
+        # self.start_pos = (start_x, start_y)
 
         self.nodes = {}
 
-        self.build_node(*self.start_pos, self.CONTROL_LOGIC)
+        self.build_node(0, 0, self.CONTROL_LOGIC)
+
+    def get_tile(self, x, y):
+        assert isinstance(x, int)
+        assert isinstance(y, int)
+
+        return self.map.get_tile(x + self.start_x, y + self.start_y)
 
     def get_node(self, x, y):
         pos = (x, y)
@@ -75,7 +85,7 @@ class Base:
     def build_node(self, x, y, type):
         assert isinstance(x, int)
         assert isinstance(y, int)
-        pos = (x, y)
+        pos = (x + self.start_x, y + self.start_y)
 
         assert pos not in self.nodes
         self.nodes[pos] = type
