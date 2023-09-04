@@ -2,79 +2,93 @@
   "blueprint": {
     "entities": [
       {
-        "connections": {
-          "1": {
-            "red": [
-              {
-                "entity_id": 2
-              }
-            ]
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": ">",
+            "constant": 0,
+            "copy_count_from_input": true
           }
         },
         "entity_number": 1,
-        "name": "constant-combinator",
+        "name": "decider-combinator",
         "position": {
           "x": 31.5,
-          "y": -32.5
+          "y": -45
         }
       },
       {
-        "connections": {
-          "1": {
-            "red": [
-              {
-                "entity_id": 1
-              },
-              {
-                "entity_id": 3
-              }
-            ]
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": "=",
+            "constant": 0,
+            "copy_count_from_input": true
           }
         },
         "entity_number": 2,
-        "name": "constant-combinator",
+        "name": "decider-combinator",
         "position": {
           "x": 33.5,
-          "y": -32.5
+          "y": -45
         }
       },
       {
-        "connections": {
-          "1": {
-            "green": [
-              {
-                "entity_id": 4
-              }
-            ],
-            "red": [
-              {
-                "entity_id": 2
-              }
-            ]
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": "<",
+            "constant": 0,
+            "copy_count_from_input": true
           }
         },
         "entity_number": 3,
-        "name": "constant-combinator",
+        "name": "decider-combinator",
         "position": {
-          "x": 35.5,
-          "y": -32.5
+          "x": 32.5,
+          "y": -45
         }
       },
       {
-        "connections": {
-          "1": {
-            "green": [
-              {
-                "entity_id": 3
-              }
-            ]
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": "\u2264",
+            "constant": 0,
+            "copy_count_from_input": true
           }
         },
         "entity_number": 4,
-        "name": "constant-combinator",
+        "name": "decider-combinator",
         "position": {
-          "x": 37.5,
-          "y": -32.5
+          "x": 35.5,
+          "y": -45
+        }
+      },
+      {
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": "\u2265",
+            "constant": 0,
+            "copy_count_from_input": true
+          }
+        },
+        "entity_number": 5,
+        "name": "decider-combinator",
+        "position": {
+          "x": 34.5,
+          "y": -45
+        }
+      },
+      {
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": "\u2260",
+            "constant": 0,
+            "copy_count_from_input": true
+          }
+        },
+        "entity_number": 6,
+        "name": "decider-combinator",
+        "position": {
+          "x": 36.5,
+          "y": -45
         }
       }
     ],
@@ -82,7 +96,7 @@
       {
         "index": 1,
         "signal": {
-          "name": "constant-combinator",
+          "name": "decider-combinator",
           "type": "item"
         }
       }

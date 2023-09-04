@@ -54,7 +54,7 @@ class Blueprint:
         self.entities = []
         self.connections = []
 
-        self.icons = [Icon()]
+        self.icons = [IconSignal("wooden-chest", "item")]
     
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -78,6 +78,8 @@ class Blueprint:
         entities = []
         for index, entity in enumerate(self.entities):
             e = {}
+            if isinstance(entity, DeciderCombinator):
+                e["control_behavior"] = entity.conditions.to_dict()
             if index+1 in connection_lookup:
                 e["connections"] = connection_lookup[index+1]
             e["entity_number"] = index+1
@@ -114,18 +116,65 @@ class Entity:
             "x": self.x, "y": self.y
         }}
 
-class Icon:
-    def __init__(self) -> None:
-        self.name = "wooden-chest"
-        self.type = "item"
-    
+class Signal:
+    def __init__(self, name, type) -> None:
+        self.name = name
+        self.type = type
+        
     def to_dict(self):
         return {
-            "signal": {
-                "name": self.name,
-                "type": self.type
-            }
+            "name": self.name,
+            "type": self.type
         }
+
+class IconSignal(Signal):
+    def to_dict(self):
+        return {
+            "signal": super().to_dict()
+        }
+
+class DeciderConditions:
+    GREATER_THAN = ">"
+    LESS_THAN = "<"
+    EQUAL_TO = "="
+    
+    GREATER_THAN_OR_EQUAL_TO = "\u2265"
+    LESS_THAN_OR_EQUAL_TO = "\u2264"
+    NOT_EQUAL_TO = "\u2260"
+
+    def __init__(self, input, output, operation, second=0) -> None:
+        self.comparator = operation
+
+        self.copy_count_from_input = True
+
+        self.signal_1 = input
+        self.output_signal = output
+
+        self.signal_2 = None
+        self.constant = 0
+        if isinstance(second, Signal):
+            self.signal_2 = second
+        else:
+            assert isinstance(second, int)
+            self.constant = second
+    
+    def to_dict(self):
+        d = {}
+        
+        d["comparator"] = self.comparator
+
+        if not self.signal_2:
+            d["constant"] = self.constant
+
+        d["copy_count_from_input"] = self.copy_count_from_input
+
+        d["first_signal"] = self.signal_1.to_dict()
+        d["output_signal"] = self.output_signal.to_dict()
+
+        if self.signal_2:
+            d["second_signal"] = self.signal_2.to_dict()
+        
+        return {"decider_conditions": d}
 
 
 class WoodenChest(Entity):
@@ -136,26 +185,42 @@ class ConstantCombinator(Entity):
     def __init__(self, x, y) -> None:
         super().__init__("constant-combinator", x, y)
 
+class DeciderCombinator(Entity):
+    def __init__(self, x, y, conditions: DeciderConditions) -> None:
+        super().__init__("decider-combinator", x, y)
+        self.conditions = conditions
+
+# class ArithmeticCombinator(Entity):
+#     def __init__(self, x, y) -> None:
+#         super().__init__("arithmetic-combinator", x, y)
+
 
 blueprint = Blueprint()
 
 
-previous_id1 = None
-previous_id2 = None
+# previous_id1 = None
+# previous_id2 = None
 
-for i in range(20):
-    id1 = blueprint.add_entity(WoodenChest(0.5, 0.5+i))
-    id2 = blueprint.add_entity(ConstantCombinator(1.5+i, 0.5+i))
+# for i in range(20):
+#     id1 = blueprint.add_entity(WoodenChest(0.5, 0.5+i))
+#     id2 = blueprint.add_entity(ConstantCombinator(1.5+i, 0.5+i))
 
-    blueprint.add_connection("red", id1, id2)
+#     blueprint.add_connection("red", id1, id2)
 
-    if previous_id1:
-        blueprint.add_connection("green", id1, previous_id1)
-    if previous_id2:
-        blueprint.add_connection("green", id2, previous_id2)
+#     if previous_id1:
+#         blueprint.add_connection("green", id1, previous_id1)
+#     if previous_id2:
+#         blueprint.add_connection("green", id2, previous_id2)
 
-    previous_id1 = id1
-    previous_id2 = id2
+#     previous_id1 = id1
+#     previous_id2 = id2
+
+c = DeciderConditions(
+    Signal("inserter", "item"),
+    Signal("long-handed-inserter", "item"),
+    DeciderConditions.LESS_THAN
+)
+dc = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
 
 
 print(blueprint.to_json())
