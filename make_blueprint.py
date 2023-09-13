@@ -195,37 +195,40 @@ class DeciderCombinator(Entity):
 #         super().__init__("arithmetic-combinator", x, y)
 
 
-blueprint = Blueprint()
 
 
-# previous_id1 = None
-# previous_id2 = None
-
-# for i in range(20):
-#     id1 = blueprint.add_entity(WoodenChest(0.5, 0.5+i))
-#     id2 = blueprint.add_entity(ConstantCombinator(1.5+i, 0.5+i))
-
-#     blueprint.add_connection("red", id1, id2)
-
-#     if previous_id1:
-#         blueprint.add_connection("green", id1, previous_id1)
-#     if previous_id2:
-#         blueprint.add_connection("green", id2, previous_id2)
-
-#     previous_id1 = id1
-#     previous_id2 = id2
-
-c = DeciderConditions(
-    Signal("inserter", "item"),
-    Signal("long-handed-inserter", "item"),
-    DeciderConditions.LESS_THAN
-)
-dc = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
+if __name__ == "__main__":
+    blueprint = Blueprint()
 
 
-print(blueprint.to_json())
-print(blueprint.to_encoded())
+    # previous_id1 = None
+    # previous_id2 = None
 
-with open("blueprints/custom_blueprint.json", "w") as f:
-    print(blueprint.to_json(), file=f)
+    # for i in range(20):
+    #     id1 = blueprint.add_entity(WoodenChest(0.5, 0.5+i))
+    #     id2 = blueprint.add_entity(ConstantCombinator(1.5+i, 0.5+i))
+
+    #     blueprint.add_connection("red", id1, id2)
+
+    #     if previous_id1:
+    #         blueprint.add_connection("green", id1, previous_id1)
+    #     if previous_id2:
+    #         blueprint.add_connection("green", id2, previous_id2)
+
+    #     previous_id1 = id1
+    #     previous_id2 = id2
+
+    c = DeciderConditions(
+        Signal("inserter", "item"),
+        Signal("long-handed-inserter", "item"),
+        DeciderConditions.LESS_THAN
+    )
+    dc = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
+
+
+    print(blueprint.to_json())
+    print(blueprint.to_encoded())
+
+    with open("custom_blueprint.json", "w") as f:
+        print(blueprint.to_json(), file=f)
 

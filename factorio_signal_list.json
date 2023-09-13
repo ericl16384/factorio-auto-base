@@ -1,0 +1,98 @@
+[
+    {
+        "signal": {
+            "name": "signal-0",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-1",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-2",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-3",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-4",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-5",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-6",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-7",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-8",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-9",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-A",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-B",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-C",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-D",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-E",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-F",
+            "type": "virtual"
+        }
+    }
+]
