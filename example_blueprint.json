@@ -3,156 +3,54 @@
     "entities": [
       {
         "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "*",
-            "second_constant": 0
+          "decider_conditions": {
+            "comparator": "<",
+            "copy_count_from_input": true,
+            "first_signal": {
+              "name": "signal-T",
+              "type": "virtual"
+            },
+            "output_signal": {
+              "name": "signal-T",
+              "type": "virtual"
+            },
+            "second_signal": {
+              "name": "transport-belt",
+              "type": "item"
+            }
           }
         },
         "entity_number": 1,
-        "name": "arithmetic-combinator",
+        "name": "decider-combinator",
         "position": {
-          "x": 13.5,
-          "y": -45
+          "x": 15.5,
+          "y": -56
         }
       },
       {
         "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "+",
-            "second_constant": 0
+          "decider_conditions": {
+            "comparator": "<",
+            "copy_count_from_input": false,
+            "first_signal": {
+              "name": "signal-T",
+              "type": "virtual"
+            },
+            "output_signal": {
+              "name": "signal-T",
+              "type": "virtual"
+            },
+            "second_signal": {
+              "name": "transport-belt",
+              "type": "item"
+            }
           }
         },
         "entity_number": 2,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 15.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "/",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 3,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 14.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "%",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 4,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 17.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "-",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 5,
-        "name": "arithmetic-combinator",
+        "name": "decider-combinator",
         "position": {
           "x": 16.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "<<",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 6,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 19.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "^",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 7,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 18.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "AND",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 8,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 21.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": ">>",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 9,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 20.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "XOR",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 10,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 23.5,
-          "y": -45
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "operation": "OR",
-            "second_constant": 0
-          }
-        },
-        "entity_number": 11,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": 22.5,
-          "y": -45
+          "y": -56
         }
       }
     ],
@@ -160,7 +58,7 @@
       {
         "index": 1,
         "signal": {
-          "name": "arithmetic-combinator",
+          "name": "decider-combinator",
           "type": "item"
         }
       }
