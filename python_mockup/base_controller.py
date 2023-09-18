@@ -56,14 +56,23 @@ class GetNextMove:
             self.next_move_x += 1
             self.next_move_y += 1
             # print(f"move switched")
-
-
-        # start
-        if self.next_move_x == 0 and self.next_move_y == 0:
-            self.new_layer += 1
         
-        # new layer
-        if self.x == self.layer and self.y == -1:
+
+        next_x = self.x + self.next_move_x
+        next_y = self.y + self.next_move_y
+
+
+        # # start
+        # if self.next_move_x == 0 and self.next_move_y == 0:
+        #     self.new_layer += 1
+        
+        # # new layer
+        # if self.x == self.layer and self.y == -1:
+        #     self.new_layer += 1
+
+        # if self.x == self.layer and next_y == 0:
+        #     self.new_layer += 1
+        if next_x == self.layer and next_y == 0:
             self.new_layer += 1
         
         if self.new_layer:
@@ -72,6 +81,8 @@ class GetNextMove:
             self.layer += 1
             self.next_move_x = self.layer - self.x
             self.next_move_y = -self.y
+            # self.layer += 1
+            # self.next_move_x
         
         
         out = ((self.x, self.y), self.node)
