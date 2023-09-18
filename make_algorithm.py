@@ -55,14 +55,27 @@ class Simulation:
     
     class Combinator:
         lambda_operations = {
+            co.MULTIPLY: lambda a, b: a * b,
+            co.DIVIDE: lambda a, b: a / b,
             co.ADD: lambda a, b: a + b,
+            co.SUBTRACT: lambda a, b: a - b,
+            co.MOD: lambda a, b: a % b,
+            co.EXPONENTIATE: lambda a, b: a ** b,
 
+            co.SHIFT_LEFT: lambda a, b: a << b,
+            co.SHIFT_RIGHT: lambda a, b: a >> b,
             co.AND: lambda a, b: a and b,
+            co.OR: lambda a, b: a or b,
+            co.XOR: lambda a, b: a ^ b,
 
+
+            co.GREATER_THAN: lambda a, b: a > b,
             co.LESS_THAN: lambda a, b: a < b,
             co.EQUAL_TO: lambda a, b: a == b,
 
-            co.LESS_THAN_OR_EQUAL_TO: lambda a, b: a <= b
+            co.GREATER_THAN_OR_EQUAL_TO: lambda a, b: a >= b,
+            co.LESS_THAN_OR_EQUAL_TO: lambda a, b: a <= b,
+            co.NOT_EQUAL_TO: lambda a, b: a != b
         }
 
         def __init__(self, first, operation, second, output) -> None:
