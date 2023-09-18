@@ -1,6 +1,6 @@
 import make_blueprint, random
 
-import arithmetic_operations, decider_operations
+import combinator_operations as co
 
 import json
 with open("factorio_signal_list.json", "r") as f:
@@ -31,44 +31,104 @@ with open("factorio_signal_list.json", "r") as f:
 
 class Simulation:
     def __init__(self) -> None:
-        self.combinators = set()
         self.signals = set()
+        self.combinators = set()
 
 
     class Signal:
-        def __init__(self, simulation) -> None:
+        def __init__(self, simulation, default_value) -> None:
             self.simulation = simulation
+            
+            self.inputs = set()
+
+            self.default_value = default_value
+            self.value = default_value
     
-        def add_operation(self, first, operator, second):
-            return self.simulation.new_operation(first, operator, second, self)
+        def add_operation(self, first, operation, second):
+            return self.simulation.new_operation(first, operation, second, self)
+
+        def step(self):
+            self.value = self.default_value
+
+            for combinator in self.inputs:
+                self.value += combinator.output_value
     
     class Combinator:
-        def __init__(self, first, operator, second, output) -> None:
+        lambda_operations = {
+            co.ADD: lambda a, b: a + b,
+
+            co.AND: lambda a, b: a and b,
+
+            co.LESS_THAN: lambda a, b: a < b,
+            co.EQUAL_TO: lambda a, b: a == b,
+
+            co.LESS_THAN_OR_EQUAL_TO: lambda a, b: a <= b
+        }
+
+        def __init__(self, first, operation, second, output) -> None:
             self.first = first
-            self.operator = operator
+            self.operation = operation
             self.second = second
             
             self.output = output
-    
 
-    # def new_operation(self):
-    #     raise NotImplementedError
+            self.output_value = 0
+        
+        def step(self):
+            if not self.operation in self.lambda_operations:
+                raise NotImplementedError(self.operation)
+            
+            func = self.lambda_operations[self.operation]
 
-    # def new_identifier(self):
-    #     return random.randbytes(32)
+            if isinstance(self.first, Simulation.Signal):
+                a = self.first.value
+            else:
+                assert False, a
+            
+            if isinstance(self.second, Simulation.Signal):
+                b = self.second.value
+            else:
+                b = self.second
+            
+            self.output_value = func(a, b)
 
-    # def new_operation(self, first, operator, second):
-    #     output = self.new_signal()
-    #     return self.add_operation(first, operator, second, output)
     
-    def new_operation(self, first, operator, second, output=None):
-        if output == None:
-            output = self.new_signal()
-        operation = self.Combinator(first, operator, second, output)
-        self.combinators.add(operation)
-        return output
-    
-    def new_signal(self):
-        signal = self.Signal(self)
+    def new_signal(self, default_value=0):
+        signal = self.Signal(self, default_value)
         self.signals.add(signal)
         return signal
+    
+    def new_operation(self, first, operation, second, output=None):
+        if output == None:
+            output = self.new_signal()
+
+        combinator = self.Combinator(first, operation, second, output)
+
+        output.inputs.add(combinator)
+        self.combinators.add(combinator)
+
+        return output
+    
+
+    def step(self):
+        for combinator in self.combinators:
+            combinator.step()
+        
+        for signal in self.signals:
+            signal.step()
+
+    
+    def new_pulse_generator(self, time_on, total_time, on_first=True, increment_signal=None):
+        if increment_signal == None:
+            increment_signal = self.new_signal(1)
+
+        t = self.new_signal()
+        t.add_operation(t, co.LESS_THAN, total_time)
+
+        if on_first:
+            out = self.new_operation(t, co.LESS_THAN_OR_EQUAL_TO, time_on)
+        else:
+            out = self.new_operation(t, co.GREATER_THAN, total_time - time_on)
+        
+        return out
+

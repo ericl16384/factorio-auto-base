@@ -1,0 +1,21 @@
+MULTIPLY = "*"
+DIVIDE = "/"
+ADD = "+"
+SUBTRACT = "-"
+MOD = "%"
+EXPONENTIATE = "^"
+
+SHIFT_LEFT = "<<"
+SHIFT_RIGHT = ">>"
+AND = "AND"
+OR = "OR"
+XOR = "XOR"
+
+
+GREATER_THAN = ">"
+LESS_THAN = "<"
+EQUAL_TO = "="
+
+GREATER_THAN_OR_EQUAL_TO = "\u2265"
+LESS_THAN_OR_EQUAL_TO = "\u2264"
+NOT_EQUAL_TO = "\u2260"
