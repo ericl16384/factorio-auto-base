@@ -1,0 +1,12 @@
+MULTIPLY = "*"
+DIVIDE = "/"
+ADD = "+"
+SUBTRACT = "-"
+MOD = "%"
+EXPONENTIATE = "^"
+
+SHIFT_LEFT = "<<"
+SHIFT_RIGHT = ">>"
+AND = "AND"
+OR = "OR"
+XOR = "XOR"
