@@ -34,6 +34,8 @@ class Simulation:
         self.signals = []
         self.combinators = []
 
+        self.stationary = True
+
 
     class Signal:
         def __init__(self, simulation, default_value) -> None:
@@ -95,6 +97,8 @@ class Simulation:
         return signal
     
     def new_operation(self, first, operation, second, output=None):
+        self.stationary = False
+
         if output == None:
             output = self.new_signal()
 
@@ -107,9 +111,17 @@ class Simulation:
     
 
     def step(self):
+        stationary = True
+
         for combinator in self.combinators:
             combinator.step()
         
         for signal in self.signals:
+            v = signal.value
+
             signal.step()
 
+            if v != signal.value:
+                stationary = False
+        
+        self.stationary = stationary
