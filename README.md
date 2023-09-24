@@ -4,3 +4,5 @@ simulates factorio combinators, but is intended to make combinator blueprints to
 
 ## TODO
  - decider combinators that can output an input value, not just 1 or 0
+ - create blueprints with arithmetic combinators
+ - create blueprints from simulations
