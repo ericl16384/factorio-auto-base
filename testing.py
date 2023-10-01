@@ -48,81 +48,80 @@ if __name__ == "__main__":
     #         break
 
 
-
     # pulse generator
 
+    pulse_delay = 60
+
     t = sim.new_signal(1)
-    t.add_operation(t, co.MOD, 60)
+    t.add_operation(t, co.MOD, pulse_delay)
+
+
+    # fibonacci
+
+    # a = sim.new_signal()
+    # b = sim.new_signal()
+    a_current = sim.new_signal()
+    b_current = sim.new_signal()
+    a_next = sim.new_signal()
+    b_next = sim.new_signal()
+
+    # a.add_operation(b, co.ADD, 0)
+    # b.add_operation(a, co.ADD, b)
+    a_next.add_operation(b_current, co.ADD, 0)
+    b_next.add_operation(a_current, co.ADD, b_current)
+
+    # b.value += 1
+
+
+    # logic stepper
+
+    do_step = sim.new_operation(t, co.EQUAL_TO, pulse_delay)
+    do_not_step = sim.new_operation(t, co.NOT_EQUAL_TO, pulse_delay)
+
+    # memory
+    a_current.add_operation(do_not_step, co.MULTIPLY, a_current)
+    b_current.add_operation(do_not_step, co.MULTIPLY, b_current)
+    
+    # step
+    a_current.add_operation(do_step, co.MULTIPLY, a_next)
+    b_current.add_operation(do_step, co.MULTIPLY, b_next)
+
+
+    # starter signal
+
+    t1 = sim.new_signal()
+    t1.add_operation(t1, co.ADD, 1)
+
+    b_current.add_operation(t1, co.EQUAL_TO, 7)
     
 
 
-
-    sim.assign_factorio_signals()
-
-    blueprint = make_blueprint.Blueprint()
-
-    x = 0.5
-    y = 0
-
-    circuit_keys = []
-
-    default_signals = []
-    for signal in sim.signals:
-        if signal.default_value:
-            default_signals.append(signal)
+    blueprint = sim.make_blueprint()
     
-    for i in range(0, len(default_signals), 20):
-        signal_count_pairs = []
-        for j in range(i, min(i + 20, len(default_signals))):
-            signal = default_signals[j]
-            signal_count_pairs.append((signal.factorio_signal, signal.default_value))
-
-        c = blueprint.add_entity(make_blueprint.ConstantCombinator(x, y + 0.5, make_blueprint.ConstantCombinatorConditions(signal_count_pairs)))
-        x += 1
-        circuit_keys.append(c)
-        
-    for combinator in sim.combinators:
-        first = combinator.first.factorio_signal
-        output = combinator.output.factorio_signal
-
-        if isinstance(combinator.second, make_algorithm.Simulation.Signal):
-            second = combinator.second.factorio_signal
-        else:
-            second = combinator.second
-
-        conditions = make_blueprint.LogicCombinatorConditions(
-            first,
-            output,
-            combinator.operation,
-            second
-        )
-        
-        if combinator.operation in co.arithmetic:
-            c = make_blueprint.ArithmeticCombinator(x, y, conditions)
-        elif combinator.operation in co.decider:
-            c = make_blueprint.DeciderCombinator(x, y, conditions)
-
-        i = blueprint.add_entity(c)
-        x += 1
-        circuit_keys.append(i)
-
-        blueprint.add_connection("red", i, i, 1, 2)
-        # break
-
-    
-    i = blueprint.add_entity(make_blueprint.Lamp(x, y, make_blueprint.CircuitCondition(t.factorio_signal, co.GREATER_THAN_OR_EQUAL_TO, 60)))
-    x += 1
-    circuit_keys.append(i)
-    
-    for i in range(len(circuit_keys) - 1):
-        A = circuit_keys[i]
-        B = circuit_keys[i + 1]
-
-        blueprint.add_connection("red", A, B, 1, 1)
 
     with open("custom_blueprint.json", "w") as f:
         print(blueprint.to_json(), file=f)
     print(blueprint.to_encoded())
+
+    print(a_next.factorio_signal)
+    print(b_next.factorio_signal)
+
+
+    print()
+    print("START")
+    print()
+
+    while True:
+        for signal in sim.signals:
+            print(signal.value, "\t", signal.factorio_signal)
+        input()
+
+        sim.step()
+
+        if sim.stationary:
+            print("STATIONARY")
+            break
+    
 
 
 

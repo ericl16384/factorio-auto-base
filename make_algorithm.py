@@ -138,5 +138,89 @@ class Simulation:
         i = 0
 
         for s in self.signals:
-            s.factorio_signal = make_blueprint.to_signal(**FACTORIO_SIGNALS[i]["signal"])
+            s.factorio_signal = make_blueprint.Signal(**FACTORIO_SIGNALS[i]["signal"])
             i += 1
+    
+    def make_blueprint(self, include_pole=True):
+        self.assign_factorio_signals()
+
+        blueprint = make_blueprint.Blueprint()
+
+        x = 0.5
+        y = 0
+
+        entities = []
+
+        
+        # constant combinators
+
+        default_signals = []
+        for signal in self.signals:
+            if signal.default_value:
+                default_signals.append(signal)
+        
+        for i in range(0, len(default_signals), 20):
+            signal_count_pairs = []
+            for j in range(i, min(i + 20, len(default_signals))):
+                signal = default_signals[j]
+                signal_count_pairs.append((signal.factorio_signal, signal.default_value))
+
+            c = blueprint.add_entity(make_blueprint.ConstantCombinator(x, y + 0.5, make_blueprint.ConstantCombinatorConditions(
+                signal_count_pairs
+            )))
+            x += 1
+            entities.append(c)
+        
+
+        # combinators
+
+        for combinator in self.combinators:
+            first = combinator.first.factorio_signal
+            output = combinator.output.factorio_signal
+
+            if isinstance(combinator.second, Simulation.Signal):
+                second = combinator.second.factorio_signal
+            else:
+                second = combinator.second
+
+            conditions = make_blueprint.LogicCombinatorConditions(
+                first,
+                output,
+                combinator.operation,
+                second
+            )
+            
+            if combinator.operation in co.arithmetic:
+                c = make_blueprint.ArithmeticCombinator(x, y, conditions)
+            elif combinator.operation in co.decider:
+                c = make_blueprint.DeciderCombinator(x, y, conditions)
+
+            i = blueprint.add_entity(c)
+            x += 1
+            entities.append(i)
+
+            blueprint.add_connection("red", i, i, 1, 2)
+        
+
+        # lamps 
+
+        # i = blueprint.add_entity(make_blueprint.Lamp(x, y, make_blueprint.CircuitCondition(
+        #     t.factorio_signal, co.GREATER_THAN_OR_EQUAL_TO, 60
+        # )))
+        # x += 1
+        # entities.append(i)
+
+
+        # pole
+
+        if include_pole:
+            entities.append(blueprint.add_entity(make_blueprint.SmallElectricPole(x, y + 0.5)))
+        
+
+        for i in range(len(entities) - 1):
+            A = entities[i]
+            B = entities[i + 1]
+
+            blueprint.add_connection("red", A, B, 1, 1)
+
+        return blueprint

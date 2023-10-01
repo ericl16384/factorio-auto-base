@@ -125,12 +125,7 @@ class Entity:
         return {"name": self.name, "position": {
             "x": self.x, "y": self.y
         }}
-
-def to_signal(name, type):
-    return {
-        "name": name,
-        "type": type
-    }
+    
 class Signal(dict):
     def __init__(self, name, type) -> None:
         super().__init__()
@@ -179,12 +174,12 @@ class ConstantCombinatorConditions(ControlBehavior):
         return d
     
 class LogicCombinatorConditions(ControlBehavior):
-    def __init__(self, input, output, operation, second=0) -> None:
+    def __init__(self, input, output, operation, second=0, copy_count=False) -> None:
         super().__init__()
 
         self.operation = operation
 
-        self.copy_count_from_input = True
+        self.copy_count_from_input = copy_count
 
         self.signal_1 = input
         self.output_signal = output
@@ -209,6 +204,7 @@ class LogicCombinatorConditions(ControlBehavior):
     def get_arithmetic_dict(self):
         d = {}
 
+        assert not self.copy_count_from_input
         # d["copy_count_from_input"] = self.copy_count_from_input
 
         d["first_signal"] = self.signal_1
@@ -234,12 +230,12 @@ class LogicCombinatorConditions(ControlBehavior):
 
         d["copy_count_from_input"] = self.copy_count_from_input
 
-        d["first_signal"] = self.signal_1.to_dict()
+        d["first_signal"] = self.signal_1
 
-        d["output_signal"] = self.output_signal.to_dict()
+        d["output_signal"] = self.output_signal
 
         if self.signal_2:
-            d["second_signal"] = self.signal_2.to_dict()
+            d["second_signal"] = self.signal_2
         
         return d
     
@@ -286,6 +282,10 @@ class LampCondition(CircuitCondition):
 class WoodenChest(Entity):
     def __init__(self, x, y) -> None:
         super().__init__("wooden-chest", x, y)
+
+class SmallElectricPole(Entity):
+    def __init__(self, x, y) -> None:
+        super().__init__("small-electric-pole", x, y)
 
 class ConstantCombinator(Entity):
     def __init__(self, x, y, control_behavior: ConstantCombinatorConditions) -> None:
@@ -362,8 +362,8 @@ if __name__ == "__main__":
     blueprint.add_connection("green", ac1, ac2, 1, 1)
 
     c1 = blueprint.add_entity(ConstantCombinator(4.5, 0, ConstantCombinatorConditions([
-        (to_signal("signal-5", "virtual"), 42),
-        (to_signal("signal-H", "virtual"), 12)
+        (Signal("signal-5", "virtual"), 42),
+        (Signal("signal-H", "virtual"), 12)
     ])))
     
 
