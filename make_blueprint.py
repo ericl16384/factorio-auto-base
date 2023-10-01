@@ -98,7 +98,7 @@ class Blueprint:
         icons = []
         for index, icon in enumerate(self.icons):
             i = {"index": index + 1}
-            i.update(icon.to_dict())
+            i.update(icon)
             icons.append(i)
 
         return {"blueprint": {
@@ -131,22 +131,30 @@ def to_signal(name, type):
         "name": name,
         "type": type
     }
-class Signal:
+class Signal(dict):
     def __init__(self, name, type) -> None:
-        self.name = name
-        self.type = type
-        
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "type": self.type
-        }
+        super().__init__()
+        self["name"] = name
+        self["type"] = type
 
-class IconSignal(Signal):
-    def to_dict(self):
-        return {
-            "signal": super().to_dict()
-        }
+        # self.name = name
+        # self.type = type
+        
+    # def to_dict(self):
+    #     return {
+    #         "name": self.name,
+    #         "type": self.type
+    #     }
+
+class IconSignal(dict):
+    def __init__(self, name, type) -> None:
+        super().__init__()
+        self["signal"] = Signal(name, type)
+
+    # def to_dict(self):
+    #     return {
+    #         "signal": super().to_dict()
+    #     }
 
 class ControlBehavior:
     pass
@@ -203,14 +211,14 @@ class LogicCombinatorConditions(ControlBehavior):
 
         # d["copy_count_from_input"] = self.copy_count_from_input
 
-        d["first_signal"] = self.signal_1.to_dict()
+        d["first_signal"] = self.signal_1
         
         d["operation"] = self.operation
 
-        d["output_signal"] = self.output_signal.to_dict()
+        d["output_signal"] = self.output_signal
 
         if self.signal_2:
-            d["second_signal"] = self.signal_2.to_dict()
+            d["second_signal"] = self.signal_2
         else:
             d["second_constant"] = self.constant
         

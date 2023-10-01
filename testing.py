@@ -20,15 +20,41 @@ if __name__ == "__main__":
     sim = make_algorithm.Simulation()
 
 
-    # a = sim.new_signal(0)
-    # b = sim.new_signal(1)
-    # c = sim.new_operation(a, co.ADD, b, a)
 
-    a = sim.new_signal()
-    b = sim.new_signal()
 
-    a.add_operation(b, co.ADD, 0)
-    b.add_operation(a, co.ADD, b)
+    # # fibonacci
+
+    # a = sim.new_signal()
+    # b = sim.new_signal()
+
+    # a.add_operation(b, co.ADD, 0)
+    # b.add_operation(a, co.ADD, b)
+
+    # b.value += 1
+
+    # print("START")
+    # print()
+
+    # for i in range(16):
+    #     print(f"a = {a.value}")
+    #     # print(f"b = {b.value}")
+    #     # print(f"c = {c.value}")
+    #     print()
+
+    #     sim.step()
+
+    #     if sim.stationary:
+    #         print("STATIONARY")
+    #         break
+
+
+
+    # pulse generator
+
+    t = sim.new_signal(1)
+    t.add_operation(t, co.MOD, 60)
+    
+
 
 
     sim.assign_factorio_signals()
@@ -37,6 +63,23 @@ if __name__ == "__main__":
 
     x = 0.5
     y = 0
+
+    circuit_keys = []
+
+    default_signals = []
+    for signal in sim.signals:
+        if signal.default_value:
+            default_signals.append(signal)
+    
+    for i in range(0, len(default_signals), 20):
+        signal_count_pairs = []
+        for j in range(i, min(i + 20, len(default_signals))):
+            signal = default_signals[j]
+            signal_count_pairs.append((signal.factorio_signal, signal.default_value))
+
+        c = blueprint.add_entity(make_blueprint.ConstantCombinator(x, y + 0.5, make_blueprint.ConstantCombinatorConditions(signal_count_pairs)))
+        circuit_keys.append(c)
+        x += 1
 
     for combinator in sim.combinators:
         first = combinator.first.factorio_signal
@@ -47,7 +90,7 @@ if __name__ == "__main__":
         else:
             second = combinator.second
 
-        conditions = make_blueprint.CombinatorConditions(
+        conditions = make_blueprint.LogicCombinatorConditions(
             first,
             output,
             combinator.operation,
@@ -60,30 +103,22 @@ if __name__ == "__main__":
             c = make_blueprint.DeciderCombinator(x, y, conditions)
         x += 1
 
-        blueprint.add_entity(c)
+        i = blueprint.add_entity(c)
+        blueprint.add_connection("red", i, i, 1, 2)
+        # break
 
+        circuit_keys.append(i)
+    
+    for i in range(len(circuit_keys) - 1):
+        A = circuit_keys[i]
+        B = circuit_keys[i + 1]
+
+        blueprint.add_connection("red", A, B, 1, 1)
+
+    with open("custom_blueprint.json", "w") as f:
+        print(blueprint.to_json(), file=f)
     print(blueprint.to_encoded())
 
-    input()
-
-
-
-    b.value += 1
-
-    print("START")
-    print()
-
-    for i in range(16):
-        print(f"a = {a.value}")
-        # print(f"b = {b.value}")
-        # print(f"c = {c.value}")
-        print()
-
-        sim.step()
-
-        if sim.stationary:
-            print("STATIONARY")
-            break
 
 
 

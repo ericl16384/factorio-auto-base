@@ -3,49 +3,30 @@
     "entities": [
       {
         "control_behavior": {
-          "arithmetic_conditions": {
-            "first_signal": {
-              "name": "transport-belt",
-              "type": "item"
+          "filters": [
+            {
+              "count": 1,
+              "index": 1,
+              "signal": {
+                "name": "signal-0",
+                "type": "virtual"
+              }
             },
-            "operation": "*",
-            "output_signal": {
-              "name": "fast-transport-belt",
-              "type": "item"
-            },
-            "second_signal": {
-              "name": "fast-splitter",
-              "type": "item"
+            {
+              "count": 1,
+              "index": 4,
+              "signal": {
+                "name": "signal-D",
+                "type": "virtual"
+              }
             }
-          }
+          ]
         },
         "entity_number": 1,
-        "name": "arithmetic-combinator",
+        "name": "constant-combinator",
         "position": {
-          "x": -86.5,
-          "y": -18
-        }
-      },
-      {
-        "control_behavior": {
-          "arithmetic_conditions": {
-            "first_signal": {
-              "name": "transport-belt",
-              "type": "item"
-            },
-            "operation": "*",
-            "output_signal": {
-              "name": "fast-transport-belt",
-              "type": "item"
-            },
-            "second_constant": 0
-          }
-        },
-        "entity_number": 2,
-        "name": "arithmetic-combinator",
-        "position": {
-          "x": -87.5,
-          "y": -18
+          "x": -76.5,
+          "y": 5.5
         }
       }
     ],
@@ -53,7 +34,7 @@
       {
         "index": 1,
         "signal": {
-          "name": "arithmetic-combinator",
+          "name": "constant-combinator",
           "type": "item"
         }
       }

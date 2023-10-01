@@ -138,5 +138,5 @@ class Simulation:
         i = 0
 
         for s in self.signals:
-            s.factorio_signal = make_blueprint.Signal(**FACTORIO_SIGNALS[i]["signal"])
+            s.factorio_signal = make_blueprint.to_signal(**FACTORIO_SIGNALS[i]["signal"])
             i += 1
