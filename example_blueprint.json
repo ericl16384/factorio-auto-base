@@ -3,54 +3,49 @@
     "entities": [
       {
         "control_behavior": {
-          "decider_conditions": {
-            "comparator": "<",
-            "copy_count_from_input": true,
+          "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-T",
-              "type": "virtual"
+              "name": "transport-belt",
+              "type": "item"
             },
+            "operation": "*",
             "output_signal": {
-              "name": "signal-T",
-              "type": "virtual"
+              "name": "fast-transport-belt",
+              "type": "item"
             },
             "second_signal": {
-              "name": "transport-belt",
+              "name": "fast-splitter",
               "type": "item"
             }
           }
         },
         "entity_number": 1,
-        "name": "decider-combinator",
+        "name": "arithmetic-combinator",
         "position": {
-          "x": 15.5,
-          "y": -56
+          "x": -86.5,
+          "y": -18
         }
       },
       {
         "control_behavior": {
-          "decider_conditions": {
-            "comparator": "<",
-            "copy_count_from_input": false,
+          "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-T",
-              "type": "virtual"
-            },
-            "output_signal": {
-              "name": "signal-T",
-              "type": "virtual"
-            },
-            "second_signal": {
               "name": "transport-belt",
               "type": "item"
-            }
+            },
+            "operation": "*",
+            "output_signal": {
+              "name": "fast-transport-belt",
+              "type": "item"
+            },
+            "second_constant": 0
           }
         },
         "entity_number": 2,
-        "name": "decider-combinator",
+        "name": "arithmetic-combinator",
         "position": {
-          "x": 16.5,
-          "y": -56
+          "x": -87.5,
+          "y": -18
         }
       }
     ],
@@ -58,12 +53,12 @@
       {
         "index": 1,
         "signal": {
-          "name": "decider-combinator",
+          "name": "arithmetic-combinator",
           "type": "item"
         }
       }
     ],
     "item": "blueprint",
-    "version": 281479277379584
+    "version": 281479277641728
   }
 }

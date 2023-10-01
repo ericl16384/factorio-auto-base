@@ -23,6 +23,79 @@
           "x": 0.5,
           "y": 0
         }
+      },
+      {
+        "control_behavior": {
+          "decider_conditions": {
+            "comparator": ">",
+            "copy_count_from_input": true,
+            "first_signal": {
+              "name": "inserter",
+              "type": "item"
+            },
+            "output_signal": {
+              "name": "long-handed-inserter",
+              "type": "item"
+            },
+            "second_signal": {
+              "name": "signal-3",
+              "type": "virtual"
+            }
+          }
+        },
+        "entity_number": 2,
+        "name": "decider-combinator",
+        "position": {
+          "x": 1.5,
+          "y": 0
+        }
+      },
+      {
+        "control_behavior": {
+          "arithmetic_conditions": {
+            "first_signal": {
+              "name": "inserter",
+              "type": "item"
+            },
+            "operation": "*",
+            "output_signal": {
+              "name": "long-handed-inserter",
+              "type": "item"
+            },
+            "second_constant": 0
+          }
+        },
+        "entity_number": 3,
+        "name": "arithmetic-combinator",
+        "position": {
+          "x": 2.5,
+          "y": 0
+        }
+      },
+      {
+        "control_behavior": {
+          "arithmetic_conditions": {
+            "first_signal": {
+              "name": "inserter",
+              "type": "item"
+            },
+            "operation": "*",
+            "output_signal": {
+              "name": "long-handed-inserter",
+              "type": "item"
+            },
+            "second_signal": {
+              "name": "signal-4",
+              "type": "virtual"
+            }
+          }
+        },
+        "entity_number": 4,
+        "name": "arithmetic-combinator",
+        "position": {
+          "x": 3.5,
+          "y": 0
+        }
       }
     ],
     "icons": [

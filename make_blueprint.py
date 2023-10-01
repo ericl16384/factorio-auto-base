@@ -1,5 +1,8 @@
 import json
+import combinator_operations as co
+
 import encode_decode
+
 
 class Blueprint:
     VERSION = 281479277379584
@@ -78,17 +81,20 @@ class Blueprint:
         entities = []
         for index, entity in enumerate(self.entities):
             e = {}
-            if isinstance(entity, DeciderCombinator):
+
+            if isinstance(entity, LogicCombinator):
                 e["control_behavior"] = entity.conditions.to_dict()
-            if index+1 in connection_lookup:
-                e["connections"] = connection_lookup[index+1]
-            e["entity_number"] = index+1
+
+            if index + 1 in connection_lookup:
+                e["connections"] = connection_lookup[index + 1]
+
+            e["entity_number"] = index + 1
             e.update(entity.to_dict())
             entities.append(e)
         
         icons = []
         for index, icon in enumerate(self.icons):
-            i = {"index": index+1}
+            i = {"index": index + 1}
             i.update(icon.to_dict())
             icons.append(i)
 
@@ -132,18 +138,10 @@ class IconSignal(Signal):
         return {
             "signal": super().to_dict()
         }
-
-class DeciderConditions:
-    GREATER_THAN = ">"
-    LESS_THAN = "<"
-    EQUAL_TO = "="
     
-    GREATER_THAN_OR_EQUAL_TO = "\u2265"
-    LESS_THAN_OR_EQUAL_TO = "\u2264"
-    NOT_EQUAL_TO = "\u2260"
-
+class CombinatorConditions:
     def __init__(self, input, output, operation, second=0) -> None:
-        self.comparator = operation
+        self.operation = operation
 
         self.copy_count_from_input = True
 
@@ -159,9 +157,35 @@ class DeciderConditions:
             self.constant = second
     
     def to_dict(self):
+        if self.operation in co.arithmetic:
+            return {"arithmetic_conditions": self.get_arithmetic_dict()}
+        elif self.operation in co.decider:
+            return {"decider_conditions": self.get_decider_dict()}
+        else:
+            assert False, self.operation
+
+    def get_arithmetic_dict(self):
+        d = {}
+
+        # d["copy_count_from_input"] = self.copy_count_from_input
+
+        d["first_signal"] = self.signal_1.to_dict()
+        
+        d["operation"] = self.operation
+
+        d["output_signal"] = self.output_signal.to_dict()
+
+        if self.signal_2:
+            d["second_signal"] = self.signal_2.to_dict()
+        else:
+            d["second_constant"] = self.constant
+        
+        return d
+
+    def get_decider_dict(self):
         d = {}
         
-        d["comparator"] = self.comparator
+        d["comparator"] = self.operation
 
         if not self.signal_2:
             d["constant"] = self.constant
@@ -169,12 +193,13 @@ class DeciderConditions:
         d["copy_count_from_input"] = self.copy_count_from_input
 
         d["first_signal"] = self.signal_1.to_dict()
+
         d["output_signal"] = self.output_signal.to_dict()
 
         if self.signal_2:
             d["second_signal"] = self.signal_2.to_dict()
         
-        return {"decider_conditions": d}
+        return d
 
 
 class WoodenChest(Entity):
@@ -185,14 +210,18 @@ class ConstantCombinator(Entity):
     def __init__(self, x, y) -> None:
         super().__init__("constant-combinator", x, y)
 
-class DeciderCombinator(Entity):
-    def __init__(self, x, y, conditions: DeciderConditions) -> None:
+class LogicCombinator(Entity):
+    pass
+
+class DeciderCombinator(LogicCombinator):
+    def __init__(self, x, y, conditions: CombinatorConditions) -> None:
         super().__init__("decider-combinator", x, y)
         self.conditions = conditions
 
-# class ArithmeticCombinator(Entity):
-#     def __init__(self, x, y) -> None:
-#         super().__init__("arithmetic-combinator", x, y)
+class ArithmeticCombinator(LogicCombinator):
+    def __init__(self, x, y, conditions: CombinatorConditions) -> None:
+        super().__init__("arithmetic-combinator", x, y)
+        self.conditions = conditions
 
 
 
@@ -218,12 +247,36 @@ if __name__ == "__main__":
     #     previous_id1 = id1
     #     previous_id2 = id2
 
-    c = DeciderConditions(
+    c = CombinatorConditions(
         Signal("inserter", "item"),
         Signal("long-handed-inserter", "item"),
-        DeciderConditions.LESS_THAN
+        co.LESS_THAN
     )
     dc = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
+
+    c = CombinatorConditions(
+        Signal("inserter", "item"),
+        Signal("long-handed-inserter", "item"),
+        co.GREATER_THAN,
+        Signal("signal-3", "virtual")
+    )
+    dc = blueprint.add_entity(DeciderCombinator(1.5, 0, c))
+
+    c = CombinatorConditions(
+        Signal("inserter", "item"),
+        Signal("long-handed-inserter", "item"),
+        co.MULTIPLY
+    )
+    dc = blueprint.add_entity(ArithmeticCombinator(2.5, 0, c))
+
+    c = CombinatorConditions(
+        Signal("inserter", "item"),
+        Signal("long-handed-inserter", "item"),
+        co.MULTIPLY,
+        Signal("signal-4", "virtual")
+    )
+    dc = blueprint.add_entity(ArithmeticCombinator(3.5, 0, c))
+    
 
 
     print(blueprint.to_json())
