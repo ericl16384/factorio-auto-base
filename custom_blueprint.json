@@ -8,7 +8,7 @@
               "count": 1,
               "index": 1,
               "signal": {
-                "name": "signal-0",
+                "name": "signal-3",
                 "type": "virtual"
               }
             }
@@ -35,15 +35,15 @@
         "control_behavior": {
           "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-0",
+              "name": "signal-1",
               "type": "virtual"
             },
-            "operation": "%",
+            "operation": "+",
             "output_signal": {
-              "name": "signal-0",
+              "name": "signal-6",
               "type": "virtual"
             },
-            "second_constant": 60
+            "second_constant": 0
           }
         },
         "connections": {
@@ -83,15 +83,18 @@
         "control_behavior": {
           "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-2",
+              "name": "signal-0",
               "type": "virtual"
             },
             "operation": "+",
             "output_signal": {
-              "name": "signal-3",
+              "name": "signal-7",
               "type": "virtual"
             },
-            "second_constant": 0
+            "second_signal": {
+              "name": "signal-1",
+              "type": "virtual"
+            }
           }
         },
         "connections": {
@@ -131,18 +134,15 @@
         "control_behavior": {
           "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-1",
+              "name": "signal-2",
               "type": "virtual"
             },
             "operation": "+",
             "output_signal": {
-              "name": "signal-4",
-              "type": "virtual"
-            },
-            "second_signal": {
               "name": "signal-2",
               "type": "virtual"
-            }
+            },
+            "second_constant": 1
           }
         },
         "connections": {
@@ -182,14 +182,14 @@
         "control_behavior": {
           "decider_conditions": {
             "comparator": "=",
-            "constant": 60,
+            "constant": 0,
             "copy_count_from_input": false,
             "first_signal": {
-              "name": "signal-0",
+              "name": "signal-2",
               "type": "virtual"
             },
             "output_signal": {
-              "name": "signal-5",
+              "name": "signal-7",
               "type": "virtual"
             }
           }
@@ -229,18 +229,17 @@
       },
       {
         "control_behavior": {
-          "decider_conditions": {
-            "comparator": "\u2260",
-            "constant": 60,
-            "copy_count_from_input": false,
+          "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-0",
+              "name": "signal-3",
               "type": "virtual"
             },
+            "operation": "%",
             "output_signal": {
-              "name": "signal-6",
+              "name": "signal-3",
               "type": "virtual"
-            }
+            },
+            "second_constant": 3
           }
         },
         "connections": {
@@ -270,7 +269,7 @@
           }
         },
         "entity_number": 6,
-        "name": "decider-combinator",
+        "name": "arithmetic-combinator",
         "position": {
           "x": 5.5,
           "y": 0
@@ -278,18 +277,16 @@
       },
       {
         "control_behavior": {
-          "arithmetic_conditions": {
+          "decider_conditions": {
+            "comparator": "=",
+            "constant": 3,
+            "copy_count_from_input": false,
             "first_signal": {
-              "name": "signal-6",
+              "name": "signal-3",
               "type": "virtual"
             },
-            "operation": "*",
             "output_signal": {
-              "name": "signal-1",
-              "type": "virtual"
-            },
-            "second_signal": {
-              "name": "signal-1",
+              "name": "signal-4",
               "type": "virtual"
             }
           }
@@ -321,7 +318,7 @@
           }
         },
         "entity_number": 7,
-        "name": "arithmetic-combinator",
+        "name": "decider-combinator",
         "position": {
           "x": 6.5,
           "y": 0
@@ -329,18 +326,16 @@
       },
       {
         "control_behavior": {
-          "arithmetic_conditions": {
+          "decider_conditions": {
+            "comparator": "\u2260",
+            "constant": 3,
+            "copy_count_from_input": false,
             "first_signal": {
-              "name": "signal-6",
+              "name": "signal-3",
               "type": "virtual"
             },
-            "operation": "*",
             "output_signal": {
-              "name": "signal-2",
-              "type": "virtual"
-            },
-            "second_signal": {
-              "name": "signal-2",
+              "name": "signal-5",
               "type": "virtual"
             }
           }
@@ -372,7 +367,7 @@
           }
         },
         "entity_number": 8,
-        "name": "arithmetic-combinator",
+        "name": "decider-combinator",
         "position": {
           "x": 7.5,
           "y": 0
@@ -382,16 +377,16 @@
         "control_behavior": {
           "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-5",
+              "name": "signal-4",
               "type": "virtual"
             },
             "operation": "*",
             "output_signal": {
-              "name": "signal-1",
+              "name": "signal-0",
               "type": "virtual"
             },
             "second_signal": {
-              "name": "signal-3",
+              "name": "signal-6",
               "type": "virtual"
             }
           }
@@ -438,11 +433,11 @@
             },
             "operation": "*",
             "output_signal": {
-              "name": "signal-2",
+              "name": "signal-0",
               "type": "virtual"
             },
             "second_signal": {
-              "name": "signal-4",
+              "name": "signal-0",
               "type": "virtual"
             }
           }
@@ -484,15 +479,18 @@
         "control_behavior": {
           "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-7",
+              "name": "signal-4",
               "type": "virtual"
             },
-            "operation": "+",
+            "operation": "*",
             "output_signal": {
-              "name": "signal-7",
+              "name": "signal-1",
               "type": "virtual"
             },
-            "second_constant": 1
+            "second_signal": {
+              "name": "signal-7",
+              "type": "virtual"
+            }
           }
         },
         "connections": {
@@ -530,16 +528,18 @@
       },
       {
         "control_behavior": {
-          "decider_conditions": {
-            "comparator": "=",
-            "constant": 7,
-            "copy_count_from_input": false,
+          "arithmetic_conditions": {
             "first_signal": {
-              "name": "signal-7",
+              "name": "signal-5",
               "type": "virtual"
             },
+            "operation": "*",
             "output_signal": {
-              "name": "signal-2",
+              "name": "signal-1",
+              "type": "virtual"
+            },
+            "second_signal": {
+              "name": "signal-1",
               "type": "virtual"
             }
           }
@@ -571,7 +571,7 @@
           }
         },
         "entity_number": 12,
-        "name": "decider-combinator",
+        "name": "arithmetic-combinator",
         "position": {
           "x": 11.5,
           "y": 0

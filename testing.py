@@ -24,11 +24,22 @@ if __name__ == "__main__":
 
     # # fibonacci
 
-    # a = sim.new_signal()
-    # b = sim.new_signal()
+    a = sim.new_signal()
+    b = sim.new_signal()
 
-    # a.add_operation(b, co.ADD, 0)
-    # b.add_operation(a, co.ADD, b)
+    a.add_operation(b, co.ADD, 0)
+    b.add_operation(a, co.ADD, b)
+
+
+    t1 = sim.new_signal()
+    t1.add_operation(t1, co.ADD, 1)
+
+    b.add_operation(t1, co.EQUAL_TO, 0)
+
+
+    a1, b1 = sim.time_step_signals((a, b), 3)
+    a1 = a1[0]
+    b1 = b1[0]
 
     # b.value += 1
 
@@ -48,71 +59,88 @@ if __name__ == "__main__":
     #         break
 
 
-    # pulse generator
+    # # pulse generator
 
-    pulse_delay = 60
+    # pulse_delay = 60
 
-    t = sim.new_signal(1)
-    t.add_operation(t, co.MOD, pulse_delay)
-
-
-    # fibonacci
-
-    # a = sim.new_signal()
-    # b = sim.new_signal()
-    a_current = sim.new_signal()
-    b_current = sim.new_signal()
-    a_next = sim.new_signal()
-    b_next = sim.new_signal()
-
-    # a.add_operation(b, co.ADD, 0)
-    # b.add_operation(a, co.ADD, b)
-    a_next.add_operation(b_current, co.ADD, 0)
-    b_next.add_operation(a_current, co.ADD, b_current)
-
-    # b.value += 1
+    # t = sim.new_signal(1)
+    # t.add_operation(t, co.MOD, pulse_delay)
 
 
-    # logic stepper
+    # # fibonacci
 
-    do_step = sim.new_operation(t, co.EQUAL_TO, pulse_delay)
-    do_not_step = sim.new_operation(t, co.NOT_EQUAL_TO, pulse_delay)
+    # # a = sim.new_signal()
+    # # b = sim.new_signal()
+    # a_outgoing = sim.new_signal()
+    # b_outgoing = sim.new_signal()
+    # a_incoming = sim.new_signal()
+    # b_incoming = sim.new_signal()
 
-    # memory
-    a_current.add_operation(do_not_step, co.MULTIPLY, a_current)
-    b_current.add_operation(do_not_step, co.MULTIPLY, b_current)
+    # # a.add_operation(b, co.ADD, 0)
+    # # b.add_operation(a, co.ADD, b)
+    # a_incoming.add_operation(b_outgoing, co.ADD, 0)
+    # b_incoming.add_operation(a_outgoing, co.ADD, b_outgoing)
+
+    # # b.value += 1
+
+
+    # # logic stepper
+
+    # do_step = sim.new_operation(t, co.EQUAL_TO, pulse_delay)
+    # do_not_step = sim.new_operation(t, co.NOT_EQUAL_TO, pulse_delay)
+
+    # # memory
+    # a_outgoing.add_operation(do_not_step, co.MULTIPLY, a_outgoing)
+    # b_outgoing.add_operation(do_not_step, co.MULTIPLY, b_outgoing)
     
-    # step
-    a_current.add_operation(do_step, co.MULTIPLY, a_next)
-    b_current.add_operation(do_step, co.MULTIPLY, b_next)
+    # # step
+    # a_outgoing.add_operation(do_step, co.MULTIPLY, a_incoming)
+    # b_outgoing.add_operation(do_step, co.MULTIPLY, b_incoming)
 
 
     # starter signal
 
-    t1 = sim.new_signal()
-    t1.add_operation(t1, co.ADD, 1)
+    # t1 = sim.new_signal()
+    # t1.add_operation(t1, co.ADD, 1)
 
-    b_current.add_operation(t1, co.EQUAL_TO, 7)
+    # b_outgoing.add_operation(t1, co.EQUAL_TO, 7)
     
 
 
     blueprint = sim.make_blueprint()
+
+    print(a.factorio_signal)
+    print(b.factorio_signal)
+    print()
+    print(a1.factorio_signal)
+    print(b1.factorio_signal)
     
 
     with open("custom_blueprint.json", "w") as f:
         print(blueprint.to_json(), file=f)
     print(blueprint.to_encoded())
 
-    print(a_next.factorio_signal)
-    print(b_next.factorio_signal)
+    input()
+
+    # print(a_incoming.factorio_signal)
+    # print(b_incoming.factorio_signal)
 
 
     print()
     print("START")
     print()
 
+    tick = 0
     while True:
+        print("t =", tick)
+        tick += 1
+
         for signal in sim.signals:
+            # if signal not in (
+            #     a, b, a1, b1
+            # ):
+            #     continue
+
             print(signal.value, "\t", signal.factorio_signal)
         input()
 

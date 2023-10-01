@@ -113,6 +113,44 @@ class Simulation:
         self.combinators.append(combinator)
 
         return output
+
+
+    def time_step_signals(self, signals, delay_length):
+        # control logic
+
+        t = self.new_signal(1)
+        t.add_operation(t, co.MOD, delay_length)
+
+        do_step = self.new_operation(t, co.EQUAL_TO, delay_length)
+        do_not_step = self.new_operation(t, co.NOT_EQUAL_TO, delay_length)
+
+
+        # find signals to replace
+
+        inbound_outbound_pairs = []
+
+        for signal in signals:
+            inbound = self.new_signal()
+            outbound = signal
+
+            inbound_outbound_pairs.append((inbound, outbound))
+
+            while outbound.inputs:
+                combinator = outbound.inputs.pop()
+                combinator.output = inbound
+
+
+        # replace individually
+
+        for inbound, outbound in inbound_outbound_pairs:
+            # step
+            outbound.add_operation(do_step, co.MULTIPLY, inbound)
+            
+            # memory
+            outbound.add_operation(do_not_step, co.MULTIPLY, outbound)
+
+
+        return inbound_outbound_pairs
     
 
     def step(self):
