@@ -1,6 +1,8 @@
-import make_blueprint, random
+import random
 
 import combinator_operations as co
+
+import make_blueprint
 
 import json
 with open("factorio_signal_list.json", "r") as f:
@@ -38,13 +40,15 @@ class Simulation:
 
 
     class Signal:
-        def __init__(self, simulation, default_value) -> None:
+        def __init__(self, simulation, default_value, factorio_signal=None) -> None:
             self.simulation = simulation
             
             self.inputs = []
 
             self.default_value = default_value
             self.value = default_value
+
+            self.factorio_signal = factorio_signal
     
         def add_operation(self, first, operation, second):
             return self.simulation.new_operation(first, operation, second, self)
@@ -57,10 +61,11 @@ class Simulation:
     
     class Combinator:
         def __init__(self, first, operation, second, output, boolean=False) -> None:
+            
             self.first = first
             self.operation = operation
             self.second = second
-            
+
             self.output = output
 
             self.boolean = boolean
@@ -125,3 +130,13 @@ class Simulation:
                 stationary = False
         
         self.stationary = stationary
+    
+
+    def assign_factorio_signals(self):
+        # will override all set factorio_signal
+
+        i = 0
+
+        for s in self.signals:
+            s.factorio_signal = make_blueprint.Signal(**FACTORIO_SIGNALS[i]["signal"])
+            i += 1

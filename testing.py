@@ -1,5 +1,6 @@
-import make_algorithm
 import combinator_operations as co
+import make_algorithm
+import make_blueprint
 
 def new_pulse_generator(sim, on_time, total_time, on_first):
     if increment_signal == None:
@@ -28,6 +29,44 @@ if __name__ == "__main__":
 
     a.add_operation(b, co.ADD, 0)
     b.add_operation(a, co.ADD, b)
+
+
+    sim.assign_factorio_signals()
+
+    blueprint = make_blueprint.Blueprint()
+
+    x = 0.5
+    y = 0
+
+    for combinator in sim.combinators:
+        first = combinator.first.factorio_signal
+        output = combinator.output.factorio_signal
+
+        if isinstance(combinator.second, make_algorithm.Simulation.Signal):
+            second = combinator.second.factorio_signal
+        else:
+            second = combinator.second
+
+        conditions = make_blueprint.CombinatorConditions(
+            first,
+            output,
+            combinator.operation,
+            second
+        )
+        
+        if combinator.operation in co.arithmetic:
+            c = make_blueprint.ArithmeticCombinator(x, y, conditions)
+        elif combinator.operation in co.decider:
+            c = make_blueprint.DeciderCombinator(x, y, conditions)
+        x += 1
+
+        blueprint.add_entity(c)
+
+    print(blueprint.to_encoded())
+
+    input()
+
+
 
     b.value += 1
 

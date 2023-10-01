@@ -6,7 +6,7 @@ import encode_decode
 
 class Blueprint:
     VERSION = 281479277379584
-    MAX_WIRE_LENGTH = 10
+    MAX_WIRE_LENGTH = 10 # not yet used, but factorio enforced
     
 
     class Connection:
@@ -152,9 +152,10 @@ class CombinatorConditions:
         self.constant = 0
         if isinstance(second, Signal):
             self.signal_2 = second
-        else:
-            assert isinstance(second, int)
+        elif isinstance(second, int):
             self.constant = second
+        else:
+            assert False, second
     
     def to_dict(self):
         if self.operation in co.arithmetic:
