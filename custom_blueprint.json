@@ -17,6 +17,24 @@
             }
           }
         },
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "circuit_id": 1,
+                "entity_id": 2
+              }
+            ]
+          },
+          "2": {
+            "red": [
+              {
+                "circuit_id": 2,
+                "entity_id": 2
+              }
+            ]
+          }
+        },
         "entity_number": 1,
         "name": "decider-combinator",
         "position": {
@@ -43,6 +61,24 @@
             }
           }
         },
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "circuit_id": 1,
+                "entity_id": 1
+              }
+            ]
+          },
+          "2": {
+            "red": [
+              {
+                "circuit_id": 2,
+                "entity_id": 1
+              }
+            ]
+          }
+        },
         "entity_number": 2,
         "name": "decider-combinator",
         "position": {
@@ -63,6 +99,24 @@
               "type": "item"
             },
             "second_constant": 0
+          }
+        },
+        "connections": {
+          "2": {
+            "green": [
+              {
+                "circuit_id": 2,
+                "entity_id": 4
+              }
+            ]
+          },
+          "1": {
+            "green": [
+              {
+                "circuit_id": 1,
+                "entity_id": 4
+              }
+            ]
           }
         },
         "entity_number": 3,
@@ -90,10 +144,56 @@
             }
           }
         },
+        "connections": {
+          "2": {
+            "green": [
+              {
+                "circuit_id": 2,
+                "entity_id": 3
+              }
+            ]
+          },
+          "1": {
+            "green": [
+              {
+                "circuit_id": 1,
+                "entity_id": 3
+              }
+            ]
+          }
+        },
         "entity_number": 4,
         "name": "arithmetic-combinator",
         "position": {
           "x": 3.5,
+          "y": 0
+        }
+      },
+      {
+        "control_behavior": {
+          "filters": [
+            {
+              "count": 42,
+              "index": 1,
+              "signal": {
+                "name": "signal-5",
+                "type": "virtual"
+              }
+            },
+            {
+              "count": 12,
+              "index": 2,
+              "signal": {
+                "name": "signal-H",
+                "type": "virtual"
+              }
+            }
+          ]
+        },
+        "entity_number": 5,
+        "name": "constant-combinator",
+        "position": {
+          "x": 4.5,
           "y": 0
         }
       }

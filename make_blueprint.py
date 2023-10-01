@@ -10,62 +10,64 @@ class Blueprint:
     
 
     class Connection:
-        def __init__(self, color, entity_1, entity_2, port_1, port_2) -> None:
+        def __init__(self, color, entityA, entityB, portA, portB) -> None:
             self.color = color
-            self.entity_1 = entity_1
-            self.entity_2 = entity_2
-            self.port_1 = port_1
-            self.port_2 = port_2
+            self.entityA = entityA
+            self.entityB = entityB
+            self.portA = portA
+            self.portB = portB
 
             # self.connections = [
-            #     (self.entity_1, self.port_1), (self.entity_2, self.port_1)
+            #     (self.entityA, self.portA), (self.entityB, self.portA)
             # ]
         
+        def prepare_entity_in_connection_lookup(self, lookup, entity, port):
+            if entity not in lookup:
+                lookup[entity] = {}
+
+            if port not in lookup[entity]:
+                lookup[entity][port] = {}
+
+            if self.color not in lookup[entity][port]:
+                lookup[entity][port][self.color] = []
+        
         def add_self_to_connection_lookup(self, lookup):
-            # 1 and 2 are identical inverses
+            self.prepare_entity_in_connection_lookup(lookup, self.entityA, self.portA)
+
+            lookup[self.entityA][self.portA][self.color].append({
+                "circuit_id": self.portB,
+                "entity_id": self.entityB
+            })
 
 
-            if self.entity_1 not in lookup:
-                lookup[self.entity_1] = {}
+            self.prepare_entity_in_connection_lookup(lookup, self.entityB, self.portB)
 
-            if self.port_1 not in lookup[self.entity_1]:
-                lookup[self.entity_1][self.port_1] = {}
-
-            if self.color not in lookup[self.entity_1][self.port_1]:
-                lookup[self.entity_1][self.port_1][self.color] = []
-
-            lookup[self.entity_1][self.port_1][self.color].append(
-                {"entity_id": self.entity_2}
-            )
-
-
-            if self.entity_2 not in lookup:
-                lookup[self.entity_2] = {}
-
-            if self.port_2 not in lookup[self.entity_2]:
-                lookup[self.entity_2][self.port_2] = {}
-
-            if self.color not in lookup[self.entity_2][self.port_2]:
-                lookup[self.entity_2][self.port_2][self.color] = []
-
-            lookup[self.entity_2][self.port_2][self.color].append(
-                {"entity_id": self.entity_1}
-            )
+            lookup[self.entityB][self.portB][self.color].append({
+                "circuit_id": self.portA,
+                "entity_id": self.entityA
+            })
 
 
     def __init__(self) -> None:
-        self.entities = []
+        self.entities = {}
+
+        self.circuits = {}
         self.connections = []
+
+        self.next_entity_number = 1
 
         self.icons = [IconSignal("wooden-chest", "item")]
     
     def add_entity(self, entity):
-        self.entities.append(entity)
-        return len(self.entities)
+        i = self.next_entity_number
+        self.next_entity_number += 1
+
+        self.entities[i] = entity
+        return i
     
-    def add_connection(self, color, entity_1, entity_2, port_1=1, port_2=1):
+    def add_connection(self, color, entityA, entityB, portA, portB):
         connection = self.Connection(
-            color, entity_1, entity_2, port_1, port_2
+            color, entityA, entityB, portA, portB
         )
         self.connections.append(connection)
     
@@ -79,16 +81,17 @@ class Blueprint:
         connection_lookup = self.get_connection_lookup()
 
         entities = []
-        for index, entity in enumerate(self.entities):
+        for entity_number in self.entities:
+            entity = self.entities[entity_number]
             e = {}
 
-            if isinstance(entity, LogicCombinator):
-                e["control_behavior"] = entity.conditions.to_dict()
+            if entity.control_behavior != None:
+                e["control_behavior"] = entity.control_behavior.to_dict()
 
-            if index + 1 in connection_lookup:
-                e["connections"] = connection_lookup[index + 1]
+            if entity_number in connection_lookup:
+                e["connections"] = connection_lookup[entity_number]
 
-            e["entity_number"] = index + 1
+            e["entity_number"] = entity_number
             e.update(entity.to_dict())
             entities.append(e)
         
@@ -116,12 +119,18 @@ class Entity:
         self.name = name
         self.x = x
         self.y = y
+        self.control_behavior = None
     
     def to_dict(self):
         return {"name": self.name, "position": {
             "x": self.x, "y": self.y
         }}
 
+def to_signal(name, type):
+    return {
+        "name": name,
+        "type": type
+    }
 class Signal:
     def __init__(self, name, type) -> None:
         self.name = name
@@ -138,9 +147,33 @@ class IconSignal(Signal):
         return {
             "signal": super().to_dict()
         }
+
+class ControlBehavior:
+    pass
+
+class ConstantCombinatorConditions(ControlBehavior):
+    def __init__(self, signal_count_pairs: list) -> None:
+        super().__init__()
+
+        assert len(signal_count_pairs) <= 20
+        self.signal_count_pairs = signal_count_pairs
     
-class CombinatorConditions:
+    def to_dict(self):
+        d = {"filters": []}
+        for i, signal_count in enumerate(self.signal_count_pairs):
+            signal, count = signal_count
+            assert isinstance(signal, dict), signal
+            d["filters"].append({
+                "count": count,
+                "index": i + 1,
+                "signal": signal
+            })
+        return d
+    
+class LogicCombinatorConditions(ControlBehavior):
     def __init__(self, input, output, operation, second=0) -> None:
+        super().__init__()
+
         self.operation = operation
 
         self.copy_count_from_input = True
@@ -202,27 +235,24 @@ class CombinatorConditions:
         
         return d
 
-
 class WoodenChest(Entity):
     def __init__(self, x, y) -> None:
         super().__init__("wooden-chest", x, y)
 
 class ConstantCombinator(Entity):
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y, control_behavior: ConstantCombinatorConditions) -> None:
         super().__init__("constant-combinator", x, y)
+        self.control_behavior = control_behavior
 
-class LogicCombinator(Entity):
-    pass
-
-class DeciderCombinator(LogicCombinator):
-    def __init__(self, x, y, conditions: CombinatorConditions) -> None:
+class DeciderCombinator(Entity):
+    def __init__(self, x, y, control_behavior: LogicCombinatorConditions) -> None:
         super().__init__("decider-combinator", x, y)
-        self.conditions = conditions
+        self.control_behavior = control_behavior
 
-class ArithmeticCombinator(LogicCombinator):
-    def __init__(self, x, y, conditions: CombinatorConditions) -> None:
+class ArithmeticCombinator(Entity):
+    def __init__(self, x, y, control_behavior: LogicCombinatorConditions) -> None:
         super().__init__("arithmetic-combinator", x, y)
-        self.conditions = conditions
+        self.control_behavior = control_behavior
 
 
 
@@ -248,39 +278,49 @@ if __name__ == "__main__":
     #     previous_id1 = id1
     #     previous_id2 = id2
 
-    c = CombinatorConditions(
+    c = LogicCombinatorConditions(
         Signal("inserter", "item"),
         Signal("long-handed-inserter", "item"),
         co.LESS_THAN
     )
-    dc = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
+    dc1 = blueprint.add_entity(DeciderCombinator(0.5, 0, c))
 
-    c = CombinatorConditions(
+    c = LogicCombinatorConditions(
         Signal("inserter", "item"),
         Signal("long-handed-inserter", "item"),
         co.GREATER_THAN,
         Signal("signal-3", "virtual")
     )
-    dc = blueprint.add_entity(DeciderCombinator(1.5, 0, c))
+    dc2 = blueprint.add_entity(DeciderCombinator(1.5, 0, c))
 
-    c = CombinatorConditions(
+    c = LogicCombinatorConditions(
         Signal("inserter", "item"),
         Signal("long-handed-inserter", "item"),
         co.MULTIPLY
     )
-    dc = blueprint.add_entity(ArithmeticCombinator(2.5, 0, c))
+    ac1 = blueprint.add_entity(ArithmeticCombinator(2.5, 0, c))
 
-    c = CombinatorConditions(
+    c = LogicCombinatorConditions(
         Signal("inserter", "item"),
         Signal("long-handed-inserter", "item"),
         co.MULTIPLY,
         Signal("signal-4", "virtual")
     )
-    dc = blueprint.add_entity(ArithmeticCombinator(3.5, 0, c))
+    ac2 = blueprint.add_entity(ArithmeticCombinator(3.5, 0, c))
+
+    blueprint.add_connection("red", dc1, dc2, 1, 1)
+    blueprint.add_connection("red", dc1, dc2, 2, 2)
+    blueprint.add_connection("green", ac1, ac2, 2, 2)
+    blueprint.add_connection("green", ac1, ac2, 1, 1)
+
+    c1 = blueprint.add_entity(ConstantCombinator(4.5, 0, ConstantCombinatorConditions([
+        (to_signal("signal-5", "virtual"), 42),
+        (to_signal("signal-H", "virtual"), 12)
+    ])))
     
 
 
-    print(blueprint.to_json())
+    # print(blueprint.to_json())
     print(blueprint.to_encoded())
 
     with open("custom_blueprint.json", "w") as f:
