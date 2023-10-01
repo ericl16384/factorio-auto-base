@@ -115,11 +115,11 @@ class Blueprint:
         return encode_decode.encode(self.to_json(0))
 
 class Entity:
-    def __init__(self, name, x, y) -> None:
+    def __init__(self, name, x, y, control_behavior=None) -> None:
         self.name = name
         self.x = x
         self.y = y
-        self.control_behavior = None
+        self.control_behavior = control_behavior
     
     def to_dict(self):
         return {"name": self.name, "position": {
@@ -156,7 +156,7 @@ class IconSignal(dict):
     #         "signal": super().to_dict()
     #     }
 
-class ControlBehavior:
+class ControlBehavior:#(dict):
     pass
 
 class ConstantCombinatorConditions(ControlBehavior):
@@ -242,6 +242,46 @@ class LogicCombinatorConditions(ControlBehavior):
             d["second_signal"] = self.signal_2.to_dict()
         
         return d
+    
+class CircuitCondition(ControlBehavior):
+    def __init__(self, first, comparator, second) -> None:
+        super().__init__()
+
+        self.first = first
+        self.second = second
+
+        self.comparator = comparator
+        self.second = 0
+        if isinstance(second, Signal):
+            self.second = second
+        elif isinstance(second, int):
+            self.constant = second
+        else:
+            assert False, second
+    
+    def to_dict(self):
+        d = {}
+
+        d["comparator"] = self.comparator
+        if not self.second:
+            d["constant"] = self.constant
+        d["first_signal"] = self.first
+
+        assert not self.second
+        # d["second_signal"] = self.second
+
+        return {"circuit_condition": d}
+
+class LampCondition(CircuitCondition):
+    def __init__(self, first, comparator, second, use_color=False) -> None:
+        super().__init__(first, comparator, second)
+        self.use_color = use_color
+    
+    def to_dict(self):
+        d = super().to_dict()
+        if self.use_color:
+            d["use_color"] = self.use_color
+        return d
 
 class WoodenChest(Entity):
     def __init__(self, x, y) -> None:
@@ -249,19 +289,19 @@ class WoodenChest(Entity):
 
 class ConstantCombinator(Entity):
     def __init__(self, x, y, control_behavior: ConstantCombinatorConditions) -> None:
-        super().__init__("constant-combinator", x, y)
-        self.control_behavior = control_behavior
+        super().__init__("constant-combinator", x, y, control_behavior)
 
 class DeciderCombinator(Entity):
     def __init__(self, x, y, control_behavior: LogicCombinatorConditions) -> None:
-        super().__init__("decider-combinator", x, y)
-        self.control_behavior = control_behavior
+        super().__init__("decider-combinator", x, y, control_behavior)
 
 class ArithmeticCombinator(Entity):
     def __init__(self, x, y, control_behavior: LogicCombinatorConditions) -> None:
-        super().__init__("arithmetic-combinator", x, y)
-        self.control_behavior = control_behavior
+        super().__init__("arithmetic-combinator", x, y, control_behavior)
 
+class Lamp(Entity):
+    def __init__(self, x, y, control_behavior: CircuitCondition) -> None:
+        super().__init__("small-lamp", x, y, control_behavior)
 
 
 

@@ -2,31 +2,61 @@
   "blueprint": {
     "entities": [
       {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 2
+              }
+            ]
+          }
+        },
         "control_behavior": {
-          "filters": [
-            {
-              "count": 1,
-              "index": 1,
-              "signal": {
-                "name": "signal-0",
-                "type": "virtual"
-              }
-            },
-            {
-              "count": 1,
-              "index": 4,
-              "signal": {
-                "name": "signal-D",
-                "type": "virtual"
-              }
+          "circuit_condition": {
+            "comparator": "\u2265",
+            "constant": 60,
+            "first_signal": {
+              "name": "signal-0",
+              "type": "virtual"
             }
-          ]
+          },
+          "use_colors": true
         },
         "entity_number": 1,
-        "name": "constant-combinator",
+        "name": "small-lamp",
         "position": {
-          "x": -76.5,
-          "y": 5.5
+          "x": -72.5,
+          "y": -8.5
+        }
+      },
+      {
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "entity_id": 1
+              }
+            ]
+          }
+        },
+        "control_behavior": {
+          "circuit_condition": {
+            "comparator": "<",
+            "first_signal": {
+              "name": "signal-0",
+              "type": "virtual"
+            },
+            "second_signal": {
+              "name": "signal-1",
+              "type": "virtual"
+            }
+          }
+        },
+        "entity_number": 2,
+        "name": "small-lamp",
+        "position": {
+          "x": -71.5,
+          "y": -8.5
         }
       }
     ],
@@ -34,7 +64,7 @@
       {
         "index": 1,
         "signal": {
-          "name": "constant-combinator",
+          "name": "small-lamp",
           "type": "item"
         }
       }

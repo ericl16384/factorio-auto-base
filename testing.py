@@ -78,9 +78,9 @@ if __name__ == "__main__":
             signal_count_pairs.append((signal.factorio_signal, signal.default_value))
 
         c = blueprint.add_entity(make_blueprint.ConstantCombinator(x, y + 0.5, make_blueprint.ConstantCombinatorConditions(signal_count_pairs)))
-        circuit_keys.append(c)
         x += 1
-
+        circuit_keys.append(c)
+        
     for combinator in sim.combinators:
         first = combinator.first.factorio_signal
         output = combinator.output.factorio_signal
@@ -101,13 +101,18 @@ if __name__ == "__main__":
             c = make_blueprint.ArithmeticCombinator(x, y, conditions)
         elif combinator.operation in co.decider:
             c = make_blueprint.DeciderCombinator(x, y, conditions)
-        x += 1
 
         i = blueprint.add_entity(c)
+        x += 1
+        circuit_keys.append(i)
+
         blueprint.add_connection("red", i, i, 1, 2)
         # break
 
-        circuit_keys.append(i)
+    
+    i = blueprint.add_entity(make_blueprint.Lamp(x, y, make_blueprint.CircuitCondition(t.factorio_signal, co.GREATER_THAN_OR_EQUAL_TO, 60)))
+    x += 1
+    circuit_keys.append(i)
     
     for i in range(len(circuit_keys) - 1):
         A = circuit_keys[i]

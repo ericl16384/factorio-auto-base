@@ -56,6 +56,10 @@
               {
                 "circuit_id": 1,
                 "entity_id": 1
+              },
+              {
+                "circuit_id": 1,
+                "entity_id": 3
               }
             ]
           },
@@ -72,6 +76,34 @@
         "name": "arithmetic-combinator",
         "position": {
           "x": 1.5,
+          "y": 0
+        }
+      },
+      {
+        "control_behavior": {
+          "circuit_condition": {
+            "comparator": "\u2265",
+            "constant": 60,
+            "first_signal": {
+              "name": "signal-0",
+              "type": "virtual"
+            }
+          }
+        },
+        "connections": {
+          "1": {
+            "red": [
+              {
+                "circuit_id": 1,
+                "entity_id": 2
+              }
+            ]
+          }
+        },
+        "entity_number": 3,
+        "name": "small-lamp",
+        "position": {
+          "x": 2.5,
           "y": 0
         }
       }
