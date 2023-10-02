@@ -94,5 +94,125 @@
             "name": "signal-F",
             "type": "virtual"
         }
+    },
+    {
+        "signal": {
+            "name": "signal-G",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-H",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-I",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-J",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-K",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-L",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-M",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-N",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-O",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-P",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-Q",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-R",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-S",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-T",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-U",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-V",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-W",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-X",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-Y",
+            "type": "virtual"
+        }
+    },
+    {
+        "signal": {
+            "name": "signal-Z",
+            "type": "virtual"
+        }
     }
 ]

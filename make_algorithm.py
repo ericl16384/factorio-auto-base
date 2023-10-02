@@ -50,8 +50,8 @@ class Simulation:
 
             self.factorio_signal = factorio_signal
     
-        def add_operation(self, first, operation, second):
-            return self.simulation.new_operation(first, operation, second, self)
+        def add_operation(self, first, operation, second, copy_count=False):
+            return self.simulation.new_operation(first, operation, second, self, copy_count)
 
         def step(self):
             self.value = self.default_value
@@ -60,7 +60,7 @@ class Simulation:
                 self.value += combinator.output_value
     
     class Combinator:
-        def __init__(self, first, operation, second, output, boolean=False) -> None:
+        def __init__(self, first, operation, second, output, copy_count) -> None:
             
             self.first = first
             self.operation = operation
@@ -68,7 +68,7 @@ class Simulation:
 
             self.output = output
 
-            self.boolean = boolean
+            self.copy_count = copy_count
 
             self.output_value = 0
         
@@ -85,13 +85,17 @@ class Simulation:
 
             if self.operation in co.arithmetic:
                 self.output_value = co.arithmetic[self.operation](a, b)
+                assert not self.copy_count
+
             elif self.operation in co.decider:
                 self.output_value = co.decider[self.operation](a, b)
-                if not self.boolean:
-                    if self.first == self.output:
-                        self.output_value = self.first.value
-                    elif self.second == self.output:
-                        self.output_value = self.second.value
+                if self.copy_count:
+                    # if self.first == self.output:
+                    #     self.output_value = self.first.value
+                    # elif self.second == self.output:
+                    #     self.output_value = self.second.value
+                    self.output_value = self.output.value
+
             else:
                 assert False, self.operation
 
@@ -101,56 +105,68 @@ class Simulation:
         self.signals.append(signal)
         return signal
     
-    def new_operation(self, first, operation, second, output=None):
+    def new_operation(self, first, operation, second, output=None, copy_count=False):
         self.stationary = False
 
         if output == None:
             output = self.new_signal()
 
-        combinator = self.Combinator(first, operation, second, output)
+        combinator = self.Combinator(first, operation, second, output, copy_count)
 
         output.inputs.append(combinator)
         self.combinators.append(combinator)
 
         return output
+    
+
+    # def add_single_memory(self, write_signal, memory_signal=None, read_signal=None):
+    #     raise NotImplementedError
+    #     if memory_signal == None:
+    #         memory_signal = self.new_signal()
+        
+    #     memory_signal.add_operation(write_signal, co.EQUAL_TO, 0, True)
+    #     memory_signal.add_operation(write_signal, co.MULTIPLY, memory_signal)
 
 
-    def time_step_signals(self, signals, delay_length):
-        # control logic
+    # def time_step_signals(self, signals, delay_length):
+    #     # control logic
 
-        t = self.new_signal(1)
-        t.add_operation(t, co.MOD, delay_length)
+    #     t = self.new_signal(1)
+    #     t.add_operation(t, co.MOD, delay_length)
 
-        do_step = self.new_operation(t, co.EQUAL_TO, delay_length)
-        do_not_step = self.new_operation(t, co.NOT_EQUAL_TO, delay_length)
-
-
-        # find signals to replace
-
-        inbound_outbound_pairs = []
-
-        for signal in signals:
-            inbound = self.new_signal()
-            outbound = signal
-
-            inbound_outbound_pairs.append((inbound, outbound))
-
-            while outbound.inputs:
-                combinator = outbound.inputs.pop()
-                combinator.output = inbound
+    #     do_step = self.new_operation(t, co.EQUAL_TO, delay_length)
+    #     do_not_step = self.new_operation(t, co.NOT_EQUAL_TO, delay_length)
 
 
-        # replace individually
+    #     # find signals to replace
 
-        for inbound, outbound in inbound_outbound_pairs:
-            # step
-            outbound.add_operation(do_step, co.MULTIPLY, inbound)
+    #     inbound_outbound_pairs = []
+
+    #     for signal in signals:
+    #         inbound = self.new_signal()
+    #         outbound = signal
+
+    #         inbound_outbound_pairs.append((inbound, outbound))
+
+    #         while outbound.inputs:
+    #             combinator = outbound.inputs.pop()
+    #             combinator.output = inbound
+
+
+    #     # replace individually
+
+    #     for inbound, outbound in inbound_outbound_pairs:
+    #         # step
+    #         outbound.add_operation(do_step, co.MULTIPLY, inbound)
             
-            # memory
-            outbound.add_operation(do_not_step, co.MULTIPLY, outbound)
+    #         # memory
+    #         outbound.add_operation(do_not_step, co.MULTIPLY, outbound)
 
 
-        return inbound_outbound_pairs
+    #     inbounds = []
+    #     for i, o in inbound_outbound_pairs:
+    #         inbounds.append(i)
+    #     return inbounds
     
 
     def step(self):
@@ -170,13 +186,20 @@ class Simulation:
         self.stationary = stationary
     
 
-    def assign_factorio_signals(self):
-        # will override all set factorio_signal
+    def assign_factorio_signals(self, override=False):
+        taken_signals = set()
+        for s in self.signals:
+            taken_signals.add(s.factorio_signal)
 
         i = 0
 
         for s in self.signals:
-            s.factorio_signal = make_blueprint.Signal(**FACTORIO_SIGNALS[i]["signal"])
+            while s.factorio_signal == None or override:
+                f_signal = make_blueprint.Signal(**FACTORIO_SIGNALS[i]["signal"])
+                if f_signal in taken_signals:
+                    i += 1
+                    continue
+                s.factorio_signal = f_signal
             i += 1
     
     def make_blueprint(self, include_pole=True):
@@ -225,7 +248,8 @@ class Simulation:
                 first,
                 output,
                 combinator.operation,
-                second
+                second,
+                combinator.copy_count
             )
             
             if combinator.operation in co.arithmetic:

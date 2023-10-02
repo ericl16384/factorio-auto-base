@@ -141,6 +141,9 @@ class Signal(dict):
     #         "type": self.type
     #     }
 
+    def __hash__(self):
+        return hash(self["name"]) + hash(self["type"])
+
 class IconSignal(dict):
     def __init__(self, name, type) -> None:
         super().__init__()

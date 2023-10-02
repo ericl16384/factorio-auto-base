@@ -2,44 +2,24 @@
   "blueprint": {
     "entities": [
       {
-        "connections": {
-          "1": {
-            "red": [
-              {
-                "circuit_id": 2,
-                "entity_id": 1
-              }
-            ]
-          },
-          "2": {
-            "red": [
-              {
-                "circuit_id": 1,
-                "entity_id": 1
-              }
-            ]
-          }
-        },
         "control_behavior": {
-          "decider_conditions": {
-            "comparator": "=",
-            "constant": 543,
-            "copy_count_from_input": false,
-            "first_signal": {
-              "name": "signal-7",
-              "type": "virtual"
-            },
-            "output_signal": {
-              "name": "signal-2",
-              "type": "virtual"
+          "filters": [
+            {
+              "count": 1,
+              "index": 1,
+              "signal": {
+                "name": "transport-belt",
+                "type": "item"
+              }
             }
-          }
+          ]
         },
+        "direction": 4,
         "entity_number": 1,
-        "name": "decider-combinator",
+        "name": "constant-combinator",
         "position": {
-          "x": -79.5,
-          "y": 10
+          "x": -177.5,
+          "y": 24.5
         }
       }
     ],
@@ -47,7 +27,7 @@
       {
         "index": 1,
         "signal": {
-          "name": "decider-combinator",
+          "name": "constant-combinator",
           "type": "item"
         }
       }
