@@ -290,6 +290,10 @@ class SmallElectricPole(Entity):
     def __init__(self, x, y) -> None:
         super().__init__("small-electric-pole", x, y)
 
+class Substation(Entity):
+    def __init__(self, x, y) -> None:
+        super().__init__("substation", x, y)
+
 class ConstantCombinator(Entity):
     def __init__(self, x, y, control_behavior: ConstantCombinatorConditions) -> None:
         super().__init__("constant-combinator", x, y, control_behavior)
