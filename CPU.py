@@ -12,12 +12,15 @@ remaining_virtual_signals.extend("0123456789ABCDEF")
 remaining_virtual_signals.reverse()
 remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
 
-INDEX_SIGNAL = remaining_virtual_signals.pop()
+OPCODE_SIGNAL = remaining_virtual_signals.pop()
+PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
+CLOCK_SIGNAL = remaining_virtual_signals.pop()
 WRITE_SIGNAL = remaining_virtual_signals.pop()
 READA_SIGNAL = remaining_virtual_signals.pop()
 READB_SIGNAL = remaining_virtual_signals.pop()
 SCALARA_SIGNAL = remaining_virtual_signals.pop()
 SCALARB_SIGNAL = remaining_virtual_signals.pop()
+STORAGE_SIGNAL = remaining_virtual_signals.pop()
 
 
 
@@ -26,9 +29,9 @@ def add_memory_cell(blueprint, x, y, index):
     combinators = []
 
     combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset, mb.LogicCombinatorConditions(
-        SCALARA_SIGNAL,
+        ANYTHING_SIGNAL,
         EVERYTHING_SIGNAL,
-        co.EQUAL_TO,
+        co.NOT_EQUAL_TO,
         0,
         True
     ))))
@@ -36,7 +39,7 @@ def add_memory_cell(blueprint, x, y, index):
     storage = combinators[-1]
 
     combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset, mb.LogicCombinatorConditions(
-        INDEX_SIGNAL,
+        WRITE_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
@@ -46,7 +49,7 @@ def add_memory_cell(blueprint, x, y, index):
     writer = combinators[-1]
 
     combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset, mb.LogicCombinatorConditions(
-        INDEX_SIGNAL,
+        READA_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
@@ -56,7 +59,7 @@ def add_memory_cell(blueprint, x, y, index):
     reader_a = combinators[-1]
 
     combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset, mb.LogicCombinatorConditions(
-        INDEX_SIGNAL,
+        READB_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
@@ -127,7 +130,7 @@ def add_opcode_cells(blueprint, x, y, index, is_arithmetic, logic:mb.LogicCombin
     assert is_arithmetic # TODO
 
     combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset, mb.LogicCombinatorConditions(
-        INDEX_SIGNAL,
+        OPCODE_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
@@ -175,7 +178,7 @@ if __name__ == "__main__":
             SCALARB_SIGNAL
         ] for operation in co.arithmetic
     ]
-    add_ALU_module(blueprint, opcodes, 6, 13)
+    add_ALU_module(blueprint, opcodes, 7, 13)
 
     # RAM
     add_RAM_module(blueprint, 0, 18, 2, 1)
