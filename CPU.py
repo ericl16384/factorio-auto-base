@@ -13,75 +13,74 @@ remaining_virtual_signals.reverse()
 remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
 
 CLOCK_SIGNAL = remaining_virtual_signals.pop()
-# PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
+PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
 OPCODE_SIGNAL = remaining_virtual_signals.pop()
+
 WRITE_SIGNAL = remaining_virtual_signals.pop()
 READA_SIGNAL = remaining_virtual_signals.pop()
 READB_SIGNAL = remaining_virtual_signals.pop()
 SCALARA_SIGNAL = remaining_virtual_signals.pop()
 SCALARB_SIGNAL = remaining_virtual_signals.pop()
+
 # WRITE_PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
 # CLEAR_MEMORY_SIGNAL = remaining_virtual_signals.pop()
+RESET_SIGNAL = remaining_virtual_signals.pop()
 
 
 
 def add_RAM_cell(blueprint, x, y, index):
     offset = 0
-    combinators = []
+    combinators = {}
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
-        ANYTHING_SIGNAL,
+    combinators["storage"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+        RESET_SIGNAL,
         EVERYTHING_SIGNAL,
-        co.NOT_EQUAL_TO,
+        co.EQUAL_TO,
         0,
         True
-    ))))
+    )))
     offset += 2
-    storage = combinators[-1]
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["writer"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         WRITE_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
         True
-    ))))
+    )))
     offset += 2
-    writer = combinators[-1]
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["reader_a"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         READA_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
         True
-    ))))
+    )))
     offset += 2
-    reader_a = combinators[-1]
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["reader_b"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         READB_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
         True
-    ))))
+    )))
     offset += 2
-    reader_b = combinators[-1]
 
-    blueprint.add_connection("red", storage, storage, 2, 1)
-    blueprint.add_connection("red", storage, writer, 1, 2)
-    blueprint.add_connection("red", writer, reader_a, 2, 1)
-    blueprint.add_connection("red", reader_a, reader_b, 1, 1)
+    blueprint.add_connection("red", combinators["storage"], combinators["storage"], 2, 1)
+    blueprint.add_connection("red", combinators["storage"], combinators["writer"], 1, 2)
+    blueprint.add_connection("red", combinators["writer"], combinators["reader_a"], 2, 1)
+    blueprint.add_connection("red", combinators["reader_a"], combinators["reader_b"], 1, 1)
 
     return combinators
 
 def link_RAM_cells(blueprint, a, b):
-    blueprint.add_connection("green", a[1], b[1], 1, 1)
-    blueprint.add_connection("green", a[2], b[2], 1, 1)
-    blueprint.add_connection("green", a[2], b[2], 2, 2)
-    blueprint.add_connection("green", a[3], b[3], 1, 1)
-    blueprint.add_connection("green", a[3], b[3], 2, 2)
+    blueprint.add_connection("green", a["writer"], b["writer"], 1, 1)
+    blueprint.add_connection("green", a["reader_a"], b["reader_a"], 1, 1)
+    blueprint.add_connection("green", a["reader_a"], b["reader_a"], 2, 2)
+    blueprint.add_connection("green", a["reader_b"], b["reader_b"], 1, 1)
+    blueprint.add_connection("green", a["reader_b"], b["reader_b"], 2, 2)
 
 def add_RAM_submodule(blueprint, x, y, length, starting_index):
     cells = []
@@ -104,56 +103,52 @@ def add_RAM_submodule(blueprint, x, y, length, starting_index):
 def add_RAM_module(blueprint, x, y, width, height):
     length = 18*width
 
-    blocks = []
+    cells = []
     index = 0
     for i in range(height):
-        blocks.append(add_RAM_submodule(blueprint, x, y+i*18, length, index))
-        index += length
-
+        cells.extend(add_RAM_submodule(blueprint, x, y+i*18, length, index))
         if i > 0:
-            link_RAM_cells(blueprint, blocks[-1][0], blocks[-2][0])
+            link_RAM_cells(blueprint, cells[index], cells[index-length])
+        index += length
         
         for j in range(width):
             blueprint.add_entity(mb.Substation(x+9+j*18, y+9+i*18))
 
-        blocks.append(add_RAM_submodule(blueprint, x, y+i*18+10, length, index))
+        cells.extend(add_RAM_submodule(blueprint, x, y+i*18+10, length, index))
+        link_RAM_cells(blueprint, cells[index], cells[index-length])
         index += length
 
-        link_RAM_cells(blueprint, blocks[-1][0], blocks[-2][0])
-    
-    return blocks
+    return cells
 
 
 def add_ROM_cell(blueprint, x, y, index, opcode, write, reada, readb):
     offset = 0
-    combinators = []
+    combinators = {}
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
-        READA_SIGNAL,
+    combinators["reader"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+        PROGRAM_COUNTER_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
         True
-    ))))
+    )))
     offset += 2
-    reader = combinators[-1]
 
-    combinators.append(blueprint.add_entity(mb.ConstantCombinator(x+0.5, y+offset+0.5, mb.ConstantCombinatorConditions((
+    combinators["storage"] = blueprint.add_entity(mb.ConstantCombinator(x+0.5, y+offset+0.5, mb.ConstantCombinatorConditions((
         (OPCODE_SIGNAL, opcode),
         (WRITE_SIGNAL, write),
         (READA_SIGNAL, reada),
         (READB_SIGNAL, readb)
-    )))))
+    ))))
     offset += 1
-    storage = combinators[-1]
 
-    blueprint.add_connection("red", reader, storage, 1, 1)
+    blueprint.add_connection("red", combinators["reader"], combinators["storage"], 1, 1)
 
     return combinators
 
 def link_ROM_cells(blueprint, a, b):
-    blueprint.add_connection("green", a[0], b[0], 1, 1)
-    blueprint.add_connection("green", a[0], b[0], 2, 2)
+    blueprint.add_connection("green", a["reader"], b["reader"], 1, 1)
+    blueprint.add_connection("green", a["reader"], b["reader"], 2, 2)
 
 def add_ROM_submodule(blueprint, x, y, length, starting_index, instructions):
     cells = []
@@ -171,113 +166,140 @@ def add_ROM_submodule(blueprint, x, y, length, starting_index, instructions):
 def add_ROM_module(blueprint, x, y, width, height, instructions):
     length = 18*width
 
-    blocks = []
+    cells = []
     index = 0
     for i in range(height):
-        blocks.append(add_ROM_submodule(blueprint, x, y+i*18, length, index, instructions[index:index+length]))
-        index += length
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18, length, index, instructions[index:index+length]))
         if i > 0:
-            link_ROM_cells(blueprint, blocks[-1][0], blocks[-2][0])
-
-        blocks.append(add_ROM_submodule(blueprint, x, y+i*18+4, length, index, instructions[index:index+length]))
+            link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
-        link_ROM_cells(blueprint, blocks[-1][0], blocks[-2][0])
+
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+3, length, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-length])
+        index += length
         
         for j in range(width):
             blueprint.add_entity(mb.Substation(x+9+j*18, y+9+i*18))
 
-        blocks.append(add_ROM_submodule(blueprint, x, y+i*18+10, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+12, length, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
-        link_ROM_cells(blueprint, blocks[-1][0], blocks[-2][0])
 
-        blocks.append(add_ROM_submodule(blueprint, x, y+i*18+14, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+15, length, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
-        link_ROM_cells(blueprint, blocks[-1][0], blocks[-2][0])
     
-    return blocks
+    return cells
 
 
 def add_ALU_cells(blueprint, x, y, index, is_arithmetic, logic:mb.LogicCombinatorConditions):
     offset = 0
-    combinators = []
+    combinators = {}
 
     assert is_arithmetic # TODO
 
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["indexer"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         OPCODE_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         index,
         True
-    ))))
+    )))
     offset += 2
-    indexer = combinators[-1]
 
-    combinators.append(blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+offset+1, logic)))
+    combinators["operator"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+offset+1, logic))
     offset += 2
-    operator = combinators[-1]
 
-    blueprint.add_connection("red", indexer, operator, 1, 2)
+    blueprint.add_connection("red", combinators["indexer"], combinators["operator"], 1, 2)
 
     return combinators
 
 def link_ALU_cells(blueprint, a, b):
-    blueprint.add_connection("green", a[0], b[0], 1, 1)
-    blueprint.add_connection("green", a[0], b[0], 2, 2)
-    blueprint.add_connection("green", a[1], b[1], 1, 1)
+    blueprint.add_connection("green", a["indexer"], b["indexer"], 1, 1)
+    blueprint.add_connection("green", a["indexer"], b["indexer"], 2, 2)
+    blueprint.add_connection("green", a["operator"], b["operator"], 1, 1)
 
 def add_ALU_controller(blueprint, x, y, clock_interval):
     offset = 0
-    combinators = []
+    combinators = {}
+
+
+    # accumulator register
+        # program counter
+
+    combinators["accumulator_register"] = blueprint.add_entity(mb.DeciderCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
+        RESET_SIGNAL,
+        EVERYTHING_SIGNAL,
+        co.EQUAL_TO,
+        0,
+        True
+    )))
+    offset += 2
 
 
     # clock
 
-    combinators.append(blueprint.add_entity(mb.ConstantCombinator(x+0.5, y+offset+0.5, mb.ConstantCombinatorConditions((
-        (CLOCK_SIGNAL, 1),
-    )))))
-    offset += 1
-    constant = combinators[-1]
-
-    combinators.append(blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
-        CLOCK_SIGNAL,
-        CLOCK_SIGNAL,
-        co.MOD,
-        clock_interval
-    ))))
-    offset += 2
-    modulus = combinators[-1]
-
-    combinators.append(blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["clock"] = blueprint.add_entity(mb.DeciderCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
         CLOCK_SIGNAL,
         CLOCK_SIGNAL,
         co.EQUAL_TO,
         clock_interval
-    ))))
+    )))
     offset += 2
-    clock = combinators[-1]
 
-    blueprint.add_connection("red", constant, modulus, 1, 2)
-    blueprint.add_connection("red", modulus, modulus, 1, 2)
-    blueprint.add_connection("red", modulus, clock, 1, 1)
+    combinators["modulus"] = blueprint.add_entity(mb.ArithmeticCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
+        CLOCK_SIGNAL,
+        CLOCK_SIGNAL,
+        co.MOD,
+        clock_interval
+    )))
+    offset += 2
+
+    combinators["constant"] = blueprint.add_entity(mb.ConstantCombinator(x+17.5, y+offset+0.5, mb.ConstantCombinatorConditions((
+        (CLOCK_SIGNAL, 1),
+    ))))
+    offset += 1
+
+    blueprint.add_connection("red", combinators["constant"], combinators["modulus"], 1, 2)
+    blueprint.add_connection("red", combinators["modulus"], combinators["modulus"], 1, 2)
+    blueprint.add_connection("red", combinators["modulus"], combinators["clock"], 1, 1)
 
 
-    # program counter
+    return combinators
 
 
 
 def add_ALU_module(blueprint, opcodes, x, y, RAM_refresh_length):
     max_operation_length = RAM_refresh_length * 10 # tbd of course
 
-    add_ALU_controller(blueprint, x, y, max_operation_length)
+    blocks = {}
+    blocks["controller"] = add_ALU_controller(blueprint, x, y, max_operation_length)
 
-    cells = []
+    blocks["operations"] = []
     for i, opcode in enumerate(opcodes):
-        cells.append(add_ALU_cells(blueprint, x+i+2, y, i, True, mb.LogicCombinatorConditions(*opcode)))
+        blocks["operations"].append(add_ALU_cells(blueprint, x+i, y, i, True, mb.LogicCombinatorConditions(*opcode)))
         if i > 0:
-            link_ALU_cells(blueprint, cells[-1], cells[-2])
+            link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
+
     blueprint.add_entity(mb.Substation(x+9, y+9))
-    return cells
+
+    return blocks
+
+
+
+def link_ALU_ROM(blueprint, alu, rom):
+    blueprint.add_connection("green", alu["controller"]["accumulator_register"], rom[0]["reader"], 2, 1)
+
+def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
+    blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reader_a"], 2, 1)
+    blueprint.add_connection("green", ram[ram_index]["reader_a"], ram[ram_index]["reader_b"], 1, 1)
+
+
+
+
+
+# connect rom output to ram input (reada readb)
+
 
 
 
@@ -298,17 +320,21 @@ if __name__ == "__main__":
             SCALARB_SIGNAL
         ] for operation in co.arithmetic
     ]
-    add_ALU_module(blueprint, opcodes, 0, 0, RAM_refresh_length)
+    alu = add_ALU_module(blueprint, opcodes, 0, 0, RAM_refresh_length)
 
     # ROM
     instructions = [
         (2, 3, 4, 5)
     ]
-    add_ROM_module(blueprint, 18, 0, 1, 1, instructions)
+    rom = add_ROM_module(blueprint, 18, 0, 1, 1, instructions)
+
+    link_ALU_ROM(blueprint, alu, rom)
 
     # RAM
-    add_RAM_module(blueprint, 0, 18, 2, 1)
+    ram = add_RAM_module(blueprint, 0, 18, 2, 1)
     # blueprint.add_connection( wire
+
+    link_ROM_RAM(blueprint, rom, ram, 54, 18)
 
 
     encoded = blueprint.to_encoded()
