@@ -2,29 +2,47 @@ import combinator_operations as co
 import make_blueprint as mb
 
 
+registered_signals = {}
+def new_sig(name, signal):
+    registered_signals[name] = signal
+    return signal
 
-EACH_SIGNAL = mb.Signal("signal-each", "virtual")
-EVERYTHING_SIGNAL = mb.Signal("signal-everything", "virtual")
-ANYTHING_SIGNAL = mb.Signal("signal-anything", "virtual")
+EACH_SIGNAL = new_sig("each", mb.Signal("signal-each", "virtual"))
+EVERYTHING_SIGNAL = new_sig("everything", mb.Signal("signal-everything", "virtual"))
+ANYTHING_SIGNAL = new_sig("anything", mb.Signal("signal-anything", "virtual"))
 
 remaining_virtual_signals = []
 remaining_virtual_signals.extend("0123456789ABCDEF")
 remaining_virtual_signals.reverse()
 remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
 
-CLOCK_SIGNAL = remaining_virtual_signals.pop()
-PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
-OPCODE_SIGNAL = remaining_virtual_signals.pop()
+CLOCK_SIGNAL = new_sig("clock", remaining_virtual_signals.pop())
+PROGRAM_COUNTER_SIGNAL = new_sig("program_counter", remaining_virtual_signals.pop())
+OPCODE_SIGNAL = new_sig("opcode", remaining_virtual_signals.pop())
 
-WRITE_SIGNAL = remaining_virtual_signals.pop()
-READA_SIGNAL = remaining_virtual_signals.pop()
-READB_SIGNAL = remaining_virtual_signals.pop()
-SCALARA_SIGNAL = remaining_virtual_signals.pop()
-SCALARB_SIGNAL = remaining_virtual_signals.pop()
+WRITE_SIGNAL = new_sig("write", remaining_virtual_signals.pop())
+READA_SIGNAL = new_sig("reada", remaining_virtual_signals.pop())
+READB_SIGNAL = new_sig("readb", remaining_virtual_signals.pop())
+SCALARA_SIGNAL = new_sig("scalara", remaining_virtual_signals.pop())
+SCALARB_SIGNAL = new_sig("scalarb", remaining_virtual_signals.pop())
 
 # WRITE_PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
 # CLEAR_MEMORY_SIGNAL = remaining_virtual_signals.pop()
-RESET_SIGNAL = remaining_virtual_signals.pop()
+RESET_SIGNAL = new_sig("reset", remaining_virtual_signals.pop())
+
+
+print()
+for name, signal in registered_signals.items():
+    print(name, " "*(20-len(name)), signal["name"])
+print()
+
+
+
+
+def create_instruction(opcode=0, write=0, reada=0, readb=0, scalara=0, scalarb=0):
+    return (opcode, write, reada, readb, scalara, scalarb)
+
+
 
 
 
@@ -121,7 +139,9 @@ def add_RAM_module(blueprint, x, y, width, height):
     return cells
 
 
-def add_ROM_cell(blueprint, x, y, index, opcode, write, reada, readb):
+def add_ROM_cell(blueprint, x, y, index, instruction):
+    opcode, write, reada, readb, scalara, scalarb = instruction
+
     offset = 0
     combinators = {}
 
@@ -138,7 +158,9 @@ def add_ROM_cell(blueprint, x, y, index, opcode, write, reada, readb):
         (OPCODE_SIGNAL, opcode),
         (WRITE_SIGNAL, write),
         (READA_SIGNAL, reada),
-        (READB_SIGNAL, readb)
+        (READB_SIGNAL, readb),
+        (SCALARA_SIGNAL, scalara),
+        (SCALARB_SIGNAL, scalarb),
     ))))
     offset += 1
 
@@ -156,8 +178,8 @@ def add_ROM_submodule(blueprint, x, y, length, starting_index, instructions):
         if i < len(instructions):
             instruction = instructions[i]
         else:
-            instruction = (0, 0, 0, 0)
-        cells.append(add_ROM_cell(blueprint, x+i, y, i+starting_index, *instruction))
+            instruction = create_instruction()
+        cells.append(add_ROM_cell(blueprint, x+i, y, i+starting_index, instruction))
 
         if i > 0:
             link_ROM_cells(blueprint, cells[-1], cells[-2])
@@ -302,8 +324,7 @@ def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
 
 
 
-
-if __name__ == "__main__":
+def main(program_instructions):
 
     print("running main cpu program")
 
@@ -323,10 +344,7 @@ if __name__ == "__main__":
     alu = add_ALU_module(blueprint, opcodes, 0, 0, RAM_refresh_length)
 
     # ROM
-    instructions = [
-        (2, 3, 4, 5)
-    ]
-    rom = add_ROM_module(blueprint, 18, 0, 1, 1, instructions)
+    rom = add_ROM_module(blueprint, 18, 0, 1, 1, program_instructions)
 
     link_ALU_ROM(blueprint, alu, rom)
 
@@ -344,3 +362,14 @@ if __name__ == "__main__":
     # input()
 
     print("finished")
+
+
+
+
+
+
+if __name__ == "__main__":
+    instructions = [
+        create_instruction(2, 1, 0, 0, 123, 456)
+    ]
+    main(instructions)
