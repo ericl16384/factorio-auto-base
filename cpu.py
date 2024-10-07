@@ -11,24 +11,25 @@ EACH_SIGNAL = new_sig("each", mb.Signal("signal-each", "virtual"))
 EVERYTHING_SIGNAL = new_sig("everything", mb.Signal("signal-everything", "virtual"))
 ANYTHING_SIGNAL = new_sig("anything", mb.Signal("signal-anything", "virtual"))
 
-remaining_virtual_signals = []
-remaining_virtual_signals.extend("0123456789ABCDEF")
-remaining_virtual_signals.reverse()
-remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
+# remaining_virtual_signals = []
+# remaining_virtual_signals.extend("0123456789ABCDEF")
+# remaining_virtual_signals.reverse()
+# remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
 
-CLOCK_SIGNAL = new_sig("clock", remaining_virtual_signals.pop())
-PROGRAM_COUNTER_SIGNAL = new_sig("program_counter", remaining_virtual_signals.pop())
-OPCODE_SIGNAL = new_sig("opcode", remaining_virtual_signals.pop())
+CLOCK_SIGNAL = new_sig("clock", mb.Signal("signal-T", "virtual"))
+PROGRAM_COUNTER_SIGNAL = new_sig("program_counter", mb.Signal("signal-I", "virtual"))
+OPCODE_SIGNAL = new_sig("opcode", mb.Signal("signal-O", "virtual"))
 
-WRITE_SIGNAL = new_sig("write", remaining_virtual_signals.pop())
-READA_SIGNAL = new_sig("reada", remaining_virtual_signals.pop())
-READB_SIGNAL = new_sig("readb", remaining_virtual_signals.pop())
-SCALARA_SIGNAL = new_sig("scalara", remaining_virtual_signals.pop())
-SCALARB_SIGNAL = new_sig("scalarb", remaining_virtual_signals.pop())
+WRITE_SIGNAL = new_sig("write", mb.Signal("signal-W", "virtual"))
+READA_SIGNAL = new_sig("reada", mb.Signal("signal-A", "virtual"))
+READB_SIGNAL = new_sig("readb", mb.Signal("signal-B", "virtual"))
+SCALARA_SIGNAL = new_sig("scalara", mb.Signal("signal-X", "virtual"))
+SCALARB_SIGNAL = new_sig("scalarb", mb.Signal("signal-Y", "virtual"))
+RAM_SIGNAL = new_sig("scalarb", mb.Signal("signal-Z", "virtual"))
 
 # WRITE_PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
 # CLEAR_MEMORY_SIGNAL = remaining_virtual_signals.pop()
-RESET_SIGNAL = new_sig("reset", remaining_virtual_signals.pop())
+RESET_SIGNAL = new_sig("reset", mb.Signal("signal-R", "virtual"))
 
 
 print()
@@ -38,9 +39,6 @@ print()
 
 
 
-
-def create_instruction(opcode=0, write=0, reada=0, readb=0, scalara=0, scalarb=0):
-    return (opcode, write, reada, readb, scalara, scalarb)
 
 
 
@@ -139,6 +137,9 @@ def add_RAM_module(blueprint, x, y, width, height):
     return cells
 
 
+def create_instruction(opcode=0, write=0, reada=0, readb=0, scalara=0, scalarb=0):
+    return (opcode, write, reada, readb, scalara, scalarb)
+
 def add_ROM_cell(blueprint, x, y, index, instruction):
     opcode, write, reada, readb, scalara, scalarb = instruction
 
@@ -187,29 +188,54 @@ def add_ROM_submodule(blueprint, x, y, length, starting_index, instructions):
 
 def add_ROM_module(blueprint, x, y, width, height, instructions):
     length = 18*width
+    sublength = length//2 - 1
 
     cells = []
     index = 0
     for i in range(height):
+        # row 1
         cells.extend(add_ROM_submodule(blueprint, x, y+i*18, length, index, instructions[index:index+length]))
         if i > 0:
             link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
 
+        # row 2
         cells.extend(add_ROM_submodule(blueprint, x, y+i*18+3, length, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-length])
+        index += length
+
+        # row 3a (before substation)
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+6, sublength, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-length])
+        index += sublength
+
+        # row 3b (after substation)
+        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+6, sublength, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-1])
+        index += sublength
+
+        # row 4a (before substation)
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+9, sublength, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-sublength*2])
+        index += sublength
+
+        # row 4b (after substation)
+        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+9, sublength, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-1])
+        index += sublength
+
+        # row 5
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+12, length, index, instructions[index:index+length]))
+        link_ROM_cells(blueprint, cells[index], cells[index-sublength*2])
+        index += length
+
+        # row 6
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+15, length, index, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
         
         for j in range(width):
             blueprint.add_entity(mb.Substation(x+9+j*18, y+9+i*18))
-
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+12, length, index, instructions[index:index+length]))
-        link_ROM_cells(blueprint, cells[index], cells[index-length])
-        index += length
-
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+15, length, index, instructions[index:index+length]))
-        link_ROM_cells(blueprint, cells[index], cells[index-length])
-        index += length
     
     return cells
 
@@ -289,8 +315,6 @@ def add_ALU_controller(blueprint, x, y, clock_interval):
 
     return combinators
 
-
-
 def add_ALU_module(blueprint, opcodes, x, y, RAM_refresh_length):
     max_operation_length = RAM_refresh_length * 10 # tbd of course
 
@@ -336,7 +360,7 @@ def main(program_instructions):
     opcodes = [
         [
             SCALARA_SIGNAL,
-            SCALARA_SIGNAL,
+            RAM_SIGNAL,
             operation,
             SCALARB_SIGNAL
         ] for operation in co.arithmetic
@@ -349,10 +373,10 @@ def main(program_instructions):
     link_ALU_ROM(blueprint, alu, rom)
 
     # RAM
-    ram = add_RAM_module(blueprint, 0, 18, 2, 1)
+    ram = add_RAM_module(blueprint, 36, 0, 2, 1)
     # blueprint.add_connection( wire
 
-    link_ROM_RAM(blueprint, rom, ram, 54, 18)
+    link_ROM_RAM(blueprint, rom, ram, 103, 36)
 
 
     encoded = blueprint.to_encoded()
@@ -370,6 +394,14 @@ def main(program_instructions):
 
 if __name__ == "__main__":
     instructions = [
-        create_instruction(2, 1, 0, 0, 123, 456)
+        create_instruction(2, 1, 0, 0, 123, 456),
+        create_instruction(6, 5, 4, 3, 2, 1),
+        
+        create_instruction(6, 0, 0, 0, 0, 0),
+        create_instruction(0, 5, 0, 0, 0, 0),
+        create_instruction(0, 0, 4, 0, 0, 0),
+        create_instruction(0, 0, 0, 3, 0, 0),
+        create_instruction(0, 0, 0, 0, 2, 0),
+        create_instruction(0, 0, 0, 0, 0, 1),
     ]
     main(instructions)
