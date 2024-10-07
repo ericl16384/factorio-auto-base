@@ -373,10 +373,10 @@ def main(program_instructions):
     link_ALU_ROM(blueprint, alu, rom)
 
     # RAM
-    ram = add_RAM_module(blueprint, 36, 0, 2, 1)
+    ram = add_RAM_module(blueprint, 36, 0, 1, 1)
     # blueprint.add_connection( wire
 
-    link_ROM_RAM(blueprint, rom, ram, 103, 36)
+    link_ROM_RAM(blueprint, rom, ram, 103, 18)
 
 
     encoded = blueprint.to_encoded()
