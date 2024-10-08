@@ -346,15 +346,6 @@ def add_RAM_interface(blueprint, x, y):
     )))
     offset += 2
     
-    combinators["write_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
-        WRITE_SIGNAL,
-        WRITE_SIGNAL,
-        co.ADD,
-        0
-    )))
-    blueprint.add_connection("green", combinators["sender"], combinators["write_filter"], 1, 2)
-    offset += 2
-    
     combinators["data_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         RAM_SIGNAL,
         RAM_SIGNAL,
@@ -363,15 +354,24 @@ def add_RAM_interface(blueprint, x, y):
     )))
     blueprint.add_connection("green", combinators["sender"], combinators["data_filter"], 1, 2)
     offset += 2
+    
+    combinators["write_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        WRITE_SIGNAL,
+        WRITE_SIGNAL,
+        co.ADD,
+        0
+    )))
+    blueprint.add_connection("green", combinators["sender"], combinators["write_filter"], 1, 2)
+    offset += 2
 
-    blueprint.add_connection("green", combinators["write_filter"], combinators["data_filter"], 1, 1)
+    # blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 1, 1)
 
 
     # reading
     
     combinators["reada_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         RAM_SIGNAL,
-        READA_SIGNAL,
+        SCALARA_SIGNAL,
         co.ADD,
         0
     )))
@@ -379,14 +379,17 @@ def add_RAM_interface(blueprint, x, y):
     
     combinators["readb_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         RAM_SIGNAL,
-        READB_SIGNAL,
+        SCALARB_SIGNAL,
         co.ADD,
         0
     )))
     offset += 2
     
-    blueprint.add_connection("green", combinators["data_filter"], combinators["reada_filter"], 1, 1)
-    blueprint.add_connection("green", combinators["reada_filter"], combinators["readb_filter"], 1, 1)
+    # blueprint.add_connection("green", combinators["write_filter"], combinators["reada_filter"], 1, 1)
+    # blueprint.add_connection("green", combinators["reada_filter"], combinators["readb_filter"], 1, 1)
+    
+    blueprint.add_connection("green", combinators["write_filter"], combinators["reada_filter"], 1, 2)
+    blueprint.add_connection("green", combinators["reada_filter"], combinators["readb_filter"], 2, 2)
 
 
     return combinators
@@ -404,7 +407,8 @@ def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
         if i > 0:
             link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
         
-    blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["indexer"], 1, 2)
+    blueprint.add_connection("green", blocks["ram_interface"]["data_filter"], blocks["operations"][10]["indexer"], 1, 2)
+    blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["operator"], 1, 1)
 
     blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
     blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["sender"], 2, 1)
@@ -422,6 +426,8 @@ def link_ALU_ROM(blueprint, alu, rom, rom_index):
 
 def link_ALU_RAM(blueprint, alu, ram, ram_index):
     blueprint.add_connection("green", alu["ram_interface"]["sender"], ram[ram_index]["writer"], 2, 1)
+    blueprint.add_connection("green", alu["ram_interface"]["write_filter"], ram[ram_index]["reada"], 1, 1)
+    blueprint.add_connection("green", alu["ram_interface"]["write_filter"], ram[ram_index]["readb"], 1, 1)
     blueprint.add_connection("green", alu["ram_interface"]["reada_filter"], ram[ram_index]["reada"], 1, 2)
     blueprint.add_connection("green", alu["ram_interface"]["readb_filter"], ram[ram_index]["readb"], 1, 2)
 
@@ -443,7 +449,10 @@ def main(program_instructions):
 
     blueprint = mb.Blueprint()
 
-    clock_interval = 60
+    clock_interval = 7
+    
+    # fails if under 6
+    assert clock_interval >= 7
 
     # ALU
     opcodes = [
@@ -517,6 +526,9 @@ if __name__ == "__main__":
 
     instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
     instructions.append(create_instruction(3, 2, 0, 0, 1, 0))
+    # for j in range(300):
+    #     i = 0
+    #     instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
     for i in range(30):
         instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
 
