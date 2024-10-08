@@ -267,7 +267,7 @@ def link_ALU_cells(blueprint, a, b):
     blueprint.add_connection("green", a["indexer"], b["indexer"], 2, 2)
     blueprint.add_connection("green", a["operator"], b["operator"], 1, 1)
 
-def add_ALU_controller(blueprint, x, y, clock_interval):
+def add_ROM_interface(blueprint, x, y):
     offset = 0
     combinators = {}
 
@@ -275,36 +275,52 @@ def add_ALU_controller(blueprint, x, y, clock_interval):
     # accumulator register
         # program counter
 
-    combinators["accumulator_register"] = blueprint.add_entity(mb.DeciderCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["accumulator_register"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         RESET_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
         0,
         True
     )))
+    blueprint.add_connection("green", combinators["accumulator_register"], combinators["accumulator_register"], 1, 2)
     offset += 2
 
+    combinators["program_counter_increment"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        CLOCK_SIGNAL,
+        PROGRAM_COUNTER_SIGNAL,
+        co.ADD,
+        0
+    )))
+    offset += 1
 
-    # clock
+    blueprint.add_connection("green", combinators["accumulator_register"], combinators["program_counter_increment"], 1, 2)
 
-    combinators["clock"] = blueprint.add_entity(mb.DeciderCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
+
+    return combinators
+
+def add_clock(blueprint, x, y, clock_interval):
+    offset = 0
+    combinators = {}
+
+    combinators["clock"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5+offset, y+1, mb.LogicCombinatorConditions(
         CLOCK_SIGNAL,
         CLOCK_SIGNAL,
         co.EQUAL_TO,
-        clock_interval
+        RAM_SIGNAL
     )))
-    offset += 2
+    offset += 1
 
-    combinators["modulus"] = blueprint.add_entity(mb.ArithmeticCombinator(x+17.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["modulus"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5+offset, y+1, mb.LogicCombinatorConditions(
         CLOCK_SIGNAL,
         CLOCK_SIGNAL,
         co.MOD,
-        clock_interval
+        RAM_SIGNAL
     )))
-    offset += 2
+    offset += 1
 
-    combinators["constant"] = blueprint.add_entity(mb.ConstantCombinator(x+17.5, y+offset+0.5, mb.ConstantCombinatorConditions((
+    combinators["constant"] = blueprint.add_entity(mb.ConstantCombinator(x+offset+0.5, y+0.5, mb.ConstantCombinatorConditions((
         (CLOCK_SIGNAL, 1),
+        (RAM_SIGNAL, clock_interval)
     ))))
     offset += 1
 
@@ -312,20 +328,65 @@ def add_ALU_controller(blueprint, x, y, clock_interval):
     blueprint.add_connection("red", combinators["modulus"], combinators["modulus"], 1, 2)
     blueprint.add_connection("red", combinators["modulus"], combinators["clock"], 1, 1)
 
+    return combinators
+
+def add_RAM_interface(blueprint, x, y):
+    offset = 0
+    combinators = {}
+
+
+    # writing
+    
+    combinators["sender"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        CLOCK_SIGNAL,
+        EVERYTHING_SIGNAL,
+        co.EQUAL_TO,
+        1,
+        True
+    )))
+    offset += 2
+    
+    combinators["data_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        RAM_SIGNAL,
+        RAM_SIGNAL,
+        co.ADD,
+        0
+    )))
+    blueprint.add_connection("green", combinators["sender"], combinators["data_filter"], 1, 2)
+    offset += 2
+    
+    combinators["write_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        WRITE_SIGNAL,
+        WRITE_SIGNAL,
+        co.ADD,
+        0
+    )))
+    blueprint.add_connection("green", combinators["sender"], combinators["write_filter"], 1, 2)
+    offset += 2
+
+    blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 1, 1)
+    blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 2, 2)
+
 
     return combinators
 
-def add_ALU_module(blueprint, opcodes, x, y, RAM_refresh_length):
-    max_operation_length = RAM_refresh_length * 10 # tbd of course
-
+def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
     blocks = {}
-    blocks["controller"] = add_ALU_controller(blueprint, x, y, max_operation_length)
+
+    blocks["rom_interface"] = add_ROM_interface(blueprint, x, y)
+    blocks["clock"] = add_clock(blueprint, x+7, y, clock_interval)
+    blocks["ram_interface"] = add_RAM_interface(blueprint, x+17, y)
 
     blocks["operations"] = []
     for i, opcode in enumerate(opcodes):
-        blocks["operations"].append(add_ALU_cells(blueprint, x+i, y, i, True, mb.LogicCombinatorConditions(*opcode)))
+        blocks["operations"].append(add_ALU_cells(blueprint, x+1+i, y+2, i, True, mb.LogicCombinatorConditions(*opcode)))
         if i > 0:
             link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
+        
+    blueprint.add_connection("green", blocks["ram_interface"]["data_filter"], blocks["operations"][10]["indexer"], 1, 2)
+
+    blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
+    blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["sender"], 2, 1)
 
     blueprint.add_entity(mb.Substation(x+9, y+9))
 
@@ -333,12 +394,17 @@ def add_ALU_module(blueprint, opcodes, x, y, RAM_refresh_length):
 
 
 
-def link_ALU_ROM(blueprint, alu, rom):
-    blueprint.add_connection("green", alu["controller"]["accumulator_register"], rom[0]["reader"], 2, 1)
+def link_ALU_ROM(blueprint, alu, rom, rom_index):
+    blueprint.add_connection("green", alu["rom_interface"]["accumulator_register"], rom[rom_index]["reader"], 1, 1)
+    blueprint.add_connection("green", alu["operations"][0]["operator"], rom[rom_index]["reader"], 1, 2)
+    blueprint.add_connection("green", alu["operations"][0]["indexer"], rom[rom_index]["reader"], 1, 2)
 
-def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
-    blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reader_a"], 2, 1)
-    blueprint.add_connection("green", ram[ram_index]["reader_a"], ram[ram_index]["reader_b"], 1, 1)
+def link_ALU_RAM(blueprint, alu, ram, ram_index):
+    blueprint.add_connection("green", alu["ram_interface"]["sender"], ram[ram_index]["writer"], 2, 1)
+
+# def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
+#     blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reader_a"], 2, 1)
+#     blueprint.add_connection("green", ram[ram_index]["reader_a"], ram[ram_index]["reader_b"], 1, 1)
 
 
 
@@ -354,7 +420,7 @@ def main(program_instructions):
 
     blueprint = mb.Blueprint()
 
-    RAM_refresh_length = 10 # tbd of course :)
+    clock_interval = 60
 
     # ALU
     opcodes = [
@@ -365,18 +431,17 @@ def main(program_instructions):
             SCALARB_SIGNAL
         ] for operation in co.arithmetic
     ]
-    alu = add_ALU_module(blueprint, opcodes, 0, 0, RAM_refresh_length)
+    alu = add_ALU_module(blueprint, opcodes, 0, 0, clock_interval)
 
     # ROM
-    rom = add_ROM_module(blueprint, 18, 0, 1, 1, program_instructions)
-
-    link_ALU_ROM(blueprint, alu, rom)
+    rom = add_ROM_module(blueprint, -18, 0, 1, 1, program_instructions)
+    link_ALU_ROM(blueprint, alu, rom, 17)
 
     # RAM
-    ram = add_RAM_module(blueprint, 36, 0, 1, 1)
-    # blueprint.add_connection( wire
+    ram = add_RAM_module(blueprint, 18, 0, 1, 1)
+    link_ALU_RAM(blueprint, alu, ram, 0)
 
-    link_ROM_RAM(blueprint, rom, ram, 103, 18)
+    # link_ROM_RAM(blueprint, rom, ram, 103, 18)
 
 
     encoded = blueprint.to_encoded()
@@ -394,14 +459,25 @@ def main(program_instructions):
 
 if __name__ == "__main__":
     instructions = [
-        create_instruction(2, 1, 0, 0, 123, 456),
-        create_instruction(6, 5, 4, 3, 2, 1),
+        # create_instruction(2, 1, 0, 0, 123, 456),
+        # create_instruction(6, 5, 4, 3, 2, 1),
         
-        create_instruction(6, 0, 0, 0, 0, 0),
-        create_instruction(0, 5, 0, 0, 0, 0),
-        create_instruction(0, 0, 4, 0, 0, 0),
-        create_instruction(0, 0, 0, 3, 0, 0),
-        create_instruction(0, 0, 0, 0, 2, 0),
-        create_instruction(0, 0, 0, 0, 0, 1),
+        # create_instruction(6, 0, 0, 0, 0, 0),
+        # create_instruction(0, 5, 0, 0, 0, 0),
+        # create_instruction(0, 0, 4, 0, 0, 0),
+        # create_instruction(0, 0, 0, 3, 0, 0),
+        # create_instruction(0, 0, 0, 0, 2, 0),
+        # create_instruction(0, 0, 0, 0, 0, 1),
+
+
+        create_instruction(0, 0, 0, 0, 1, 1),
+        create_instruction(0, 1, 0, 0, 1, 1),
     ]
+
+    a = 1
+    b = 1
+    for i in range(30):
+        instructions.append(create_instruction(2, i+2, 0, 0, a, b))
+        a, b = b, a+b
+
     main(instructions)
