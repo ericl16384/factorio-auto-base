@@ -120,7 +120,7 @@ def add_RAM_module(blueprint, x, y, width, height):
     length = 18*width
 
     cells = []
-    index = 0
+    index = 1
     for i in range(height):
         cells.extend(add_RAM_submodule(blueprint, x, y+i*18, length, index))
         if i > 0:
@@ -191,7 +191,7 @@ def add_ROM_module(blueprint, x, y, width, height, instructions):
     sublength = length//2 - 1
 
     cells = []
-    index = 0
+    index = 1
     for i in range(height):
         # row 1
         cells.extend(add_ROM_submodule(blueprint, x, y+i*18, length, index, instructions[index:index+length]))
@@ -379,7 +379,7 @@ def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
 
     blocks["operations"] = []
     for i, opcode in enumerate(opcodes):
-        blocks["operations"].append(add_ALU_cells(blueprint, x+1+i, y+2, i, True, mb.LogicCombinatorConditions(*opcode)))
+        blocks["operations"].append(add_ALU_cells(blueprint, x+1+i, y+2, i+1, True, mb.LogicCombinatorConditions(*opcode)))
         if i > 0:
             link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
         
@@ -420,7 +420,7 @@ def main(program_instructions):
 
     blueprint = mb.Blueprint()
 
-    clock_interval = 60
+    clock_interval = 600
 
     # ALU
     opcodes = [
@@ -468,16 +468,28 @@ if __name__ == "__main__":
         # create_instruction(0, 0, 0, 3, 0, 0),
         # create_instruction(0, 0, 0, 0, 2, 0),
         # create_instruction(0, 0, 0, 0, 0, 1),
-
-
-        create_instruction(0, 0, 0, 0, 1, 1),
-        create_instruction(0, 1, 0, 0, 1, 1),
     ]
 
-    a = 1
-    b = 1
-    for i in range(30):
-        instructions.append(create_instruction(2, i+2, 0, 0, a, b))
-        a, b = b, a+b
+
+
+
+    # for i in range(10):
+    #     for j in range(1, 11):
+    #         instructions.append(create_instruction(3, j, 0, 0, i*10+j, 0))
+
+    for i in range(100):
+        instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
+
+
+
+    #     create_instruction(1, 0, 0, 0, 1, 1),
+    #     create_instruction(1, 1, 0, 0, 1, 1),
+    # ]
+
+    # a = 1
+    # b = 1
+    # for i in range(30):
+    #     instructions.append(create_instruction(3, i+3, 0, 0, a, b))
+    #     a, b = b, a+b
 
     main(instructions)
