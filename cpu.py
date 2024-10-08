@@ -14,11 +14,15 @@ class Combinator_CPU:
         self.signals = {}
         self.alu_operations = []
         self.rom_instructions = []
-        self.ram_size = 0
+
+        self.rom_size_override = None
+        self.ram_size_override = None
         
         self.EACH_SIGNAL = self.add_signal("each", mb.Signal("signal-each", "virtual"))
         self.EVERYTHING_SIGNAL = self.add_signal("everything", mb.Signal("signal-everything", "virtual"))
         self.ANYTHING_SIGNAL = self.add_signal("anything", mb.Signal("signal-anything", "virtual"))
+
+        self.artificial_slowdown = 0
 
     def add_signal(self, name, signal):
         assert name not in self.signals, name
@@ -28,8 +32,9 @@ class Combinator_CPU:
     def add_alu_operation(self, operation:Combinator_System):
         self.alu_operations.append(operation)
     
-    def add_rom_instruction(self, instruction):
-        self.rom_instructions.append(instruction)
+    def add_rom_instruction(self, opcode=0, write=0, reada=0, readb=0, scalara=0, scalarb=0):
+        # self.rom_instructions.append((4, write, 0, write, 0, 0))
+        self.rom_instructions.append((opcode, write, reada, readb, scalara, scalarb))
     
     def init_basic_signals(self):
         self.add_signal("clock", mb.Signal("signal-T", "virtual"))
@@ -56,62 +61,32 @@ class Combinator_CPU:
     
     def get_minimum_clock_interval(self):
         # raise NotImplementedError
-        return 7
+
+        x = 0
+
+        x = max(x, self.artificial_slowdown)
     
         # for i in self.alu_operations
+        x = max(x, 7)
 
-    def assemble_encoded_blueprint(self):
+        return x
+
+    def assemble_blueprint(self):
         self.blueprint = mb.Blueprint()
         
         alu = add_ALU_module(self.blueprint,
             [op.combinator_behaviors[0] for op in self.alu_operations],
-        0, 0, self.get_minimum_clock_interval())
+        18, 0, self.get_minimum_clock_interval())
 
-        # ROM
-        rom = add_ROM_module(self.blueprint, -18, 0, 1, 1, self.rom_instructions)
+        rom = add_ROM_module(self.blueprint, 0, 0, 1, 3, self.rom_instructions)
+        ram = add_RAM_module(self.blueprint, 36, 0, 1, 1)
+
         link_ALU_ROM(self.blueprint, alu, rom, 17)
-
-        # RAM
-        ram = add_RAM_module(self.blueprint, 18, 0, 1, 1)
         link_ALU_RAM(self.blueprint, alu, ram, 0)
 
         # link_ROM_RAM(blueprint, rom, ram, 103, 18)
-
-
-        return self.blueprint.to_encoded()
-
-    # class Signals:
-    #     def __init__(self) -> None:
-    #         self.registered_signals = {}
-
-    #     def add_signal(self, name, signal):
-    #         self.registered_signals[name] = signal
-    #         return signal
         
-    #     def init_metasignals(self):
-    #         self.EACH_SIGNAL = self.add_signal("each", mb.Signal("signal-each", "virtual"))
-    #         self.EVERYTHING_SIGNAL = self.add_signal("everything", mb.Signal("signal-everything", "virtual"))
-    #         self.ANYTHING_SIGNAL = self.add_signal("anything", mb.Signal("signal-anything", "virtual"))
-
-    #         # self.remaining_virtual_signals = []
-    #         # self.remaining_virtual_signals.extend("0123456789ABCDEF")
-    #         # self.remaining_virtual_signals.reverse()
-    #         # self.remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
-
-    #         self.CLOCK_SIGNAL = self.add_signal("clock", mb.Signal("signal-T", "virtual"))
-    #         self.PROGRAM_COUNTER_SIGNAL = self.add_signal("program_counter", mb.Signal("signal-I", "virtual"))
-    #         self.OPCODE_SIGNAL = self.add_signal("opcode", mb.Signal("signal-O", "virtual"))
-
-    #         self.WRITE_SIGNAL = self.add_signal("write", mb.Signal("signal-W", "virtual"))
-    #         self.READA_SIGNAL = self.add_signal("reada", mb.Signal("signal-A", "virtual"))
-    #         self.READB_SIGNAL = self.add_signal("readb", mb.Signal("signal-B", "virtual"))
-    #         self.SCALARA_SIGNAL = self.add_signal("scalara", mb.Signal("signal-X", "virtual"))
-    #         self.SCALARB_SIGNAL = self.add_signal("scalarb", mb.Signal("signal-Y", "virtual"))
-    #         self.RAM_SIGNAL = self.add_signal("scalarb", mb.Signal("signal-Z", "virtual"))
-
-    #         # self.WRITE_PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
-    #         # self.CLEAR_MEMORY_SIGNAL = remaining_virtual_signals.pop()
-    #         self.RESET_SIGNAL = self.add_signal("reset", mb.Signal("signal-R", "virtual"))
+        return self.blueprint
 
 registered_signals = {}
 def new_sig(name, signal):
@@ -162,8 +137,8 @@ def add_RAM_cell(blueprint, x, y, index):
     combinators["storage"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         RESET_SIGNAL,
         EVERYTHING_SIGNAL,
-        co.EQUAL_TO,
-        0,
+        co.NOT_EQUAL_TO,
+        index,
         True
     )))
     offset += 2
@@ -448,7 +423,7 @@ def add_RAM_interface(blueprint, x, y):
 
     # writing
     
-    combinators["sender"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+    combinators["resetter"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         CLOCK_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
@@ -457,13 +432,23 @@ def add_RAM_interface(blueprint, x, y):
     )))
     offset += 2
     
+    combinators["writer"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        CLOCK_SIGNAL,
+        EVERYTHING_SIGNAL,
+        co.EQUAL_TO,
+        1,
+        True
+    )))
+    blueprint.add_connection("red", combinators["writer"], combinators["resetter"], 1, 1)
+    offset += 2
+    
     combinators["data_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         RAM_SIGNAL,
         RAM_SIGNAL,
         co.ADD,
         0
     )))
-    blueprint.add_connection("green", combinators["sender"], combinators["data_filter"], 1, 2)
+    blueprint.add_connection("green", combinators["writer"], combinators["data_filter"], 1, 2)
     offset += 2
     
     combinators["write_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
@@ -472,7 +457,7 @@ def add_RAM_interface(blueprint, x, y):
         co.ADD,
         0
     )))
-    blueprint.add_connection("green", combinators["sender"], combinators["write_filter"], 1, 2)
+    blueprint.add_connection("green", combinators["writer"], combinators["write_filter"], 1, 2)
     offset += 2
 
     # blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 1, 1)
@@ -509,7 +494,7 @@ def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
     blocks = {}
 
     blocks["rom_interface"] = add_ROM_interface(blueprint, x, y)
-    blocks["clock"] = add_clock(blueprint, x+7, y, clock_interval)
+    blocks["clock"] = add_clock(blueprint, x+8, y, clock_interval)
     blocks["ram_interface"] = add_RAM_interface(blueprint, x+17, y)
 
     blocks["operations"] = []
@@ -522,7 +507,7 @@ def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
     blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["operator"], 1, 1)
 
     blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
-    blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["sender"], 2, 1)
+    blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["resetter"], 2, 1)
 
     blueprint.add_entity(mb.Substation(x+9, y+9))
 
@@ -536,7 +521,8 @@ def link_ALU_ROM(blueprint, alu, rom, rom_index):
     blueprint.add_connection("green", alu["operations"][0]["indexer"], rom[rom_index]["reader"], 1, 2)
 
 def link_ALU_RAM(blueprint, alu, ram, ram_index):
-    blueprint.add_connection("green", alu["ram_interface"]["sender"], ram[ram_index]["writer"], 2, 1)
+    blueprint.add_connection("green", alu["ram_interface"]["resetter"], ram[ram_index]["storage"], 2, 1)
+    blueprint.add_connection("green", alu["ram_interface"]["writer"], ram[ram_index]["writer"], 2, 1)
     blueprint.add_connection("green", alu["ram_interface"]["write_filter"], ram[ram_index]["reada"], 1, 1)
     blueprint.add_connection("green", alu["ram_interface"]["write_filter"], ram[ram_index]["readb"], 1, 1)
     blueprint.add_connection("green", alu["ram_interface"]["reada_filter"], ram[ram_index]["reada"], 1, 2)
@@ -550,68 +536,19 @@ def link_ALU_RAM(blueprint, alu, ram, ram_index):
 
 
 
-# connect rom output to ram input (reada readb)
-
-
-
-def main(program_instructions):
-
-    print("running main cpu program")
-
-    blueprint = mb.Blueprint()
-
-    clock_interval = 7
-    
-    # fails if under 6
-    assert clock_interval >= 7
-
-    # ALU
-    opcodes = [
-        [
-            SCALARA_SIGNAL,
-            RAM_SIGNAL,
-            operation,
-            SCALARB_SIGNAL
-        ] for operation in co.arithmetic
-    ]
-    alu = add_ALU_module(blueprint, opcodes, 0, 0, clock_interval)
-
-    # ROM
-    rom = add_ROM_module(blueprint, -18, 0, 1, 1, program_instructions)
-    link_ALU_ROM(blueprint, alu, rom, 17)
-
-    # RAM
-    ram = add_RAM_module(blueprint, 18, 0, 1, 1)
-    link_ALU_RAM(blueprint, alu, ram, 0)
-
-    # link_ROM_RAM(blueprint, rom, ram, 103, 18)
-
-
-    encoded = blueprint.to_encoded()
-    # print(encoded)
-    with open("new_blueprint.txt", "w") as f:
-        print(encoded, file=f)
-    # input()
-
-    print("finished")
-
-
-
-
-
 
 if __name__ == "__main__":
-    instructions = [
-        # create_instruction(2, 1, 0, 0, 123, 456),
-        # create_instruction(6, 5, 4, 3, 2, 1),
+    # instructions = [
+    #     # create_instruction(2, 1, 0, 0, 123, 456),
+    #     # create_instruction(6, 5, 4, 3, 2, 1),
         
-        # create_instruction(6, 0, 0, 0, 0, 0),
-        # create_instruction(0, 5, 0, 0, 0, 0),
-        # create_instruction(0, 0, 4, 0, 0, 0),
-        # create_instruction(0, 0, 0, 3, 0, 0),
-        # create_instruction(0, 0, 0, 0, 2, 0),
-        # create_instruction(0, 0, 0, 0, 0, 1),
-    ]
+    #     # create_instruction(6, 0, 0, 0, 0, 0),
+    #     # create_instruction(0, 5, 0, 0, 0, 0),
+    #     # create_instruction(0, 0, 4, 0, 0, 0),
+    #     # create_instruction(0, 0, 0, 3, 0, 0),
+    #     # create_instruction(0, 0, 0, 0, 2, 0),
+    #     # create_instruction(0, 0, 0, 0, 0, 1),
+    # ]
 
 
 
@@ -635,28 +572,51 @@ if __name__ == "__main__":
     #     instructions.append(create_instruction(3, i+3, 0, 0, a, b))
     #     a, b = b, a+b
 
-    instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
-    instructions.append(create_instruction(3, 2, 0, 0, 1, 0))
-    # for j in range(300):
-    #     i = 0
-    #     instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
-    for i in range(30):
-        instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
+    # # instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
+    # # instructions.append(create_instruction(3, 2, 0, 0, 1, 0))
+    # # for j in range(300):
+    # #     i = 0
+    # #     instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
+    # for i in range(30):
+    #     # instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
+
+    #     # fibonacci instructions assuming writes are absolute (they are not)
+    #     # instructions.append(create_instruction(3, 3, 1, 2, 0, 0))
+    #     # instructions.append(create_instruction(3, 1, 2, 0, 0, 0))
+    #     # instructions.append(create_instruction(3, 2, 3, 0, 0, 0))
+
+
+    #     instructions.append(create_instruction(4, 3, 1, 0, 0, 0))
+
+    #     instructions.append(create_instruction(4, 1, 2, 1, 0, 0))
+
+    #     instructions.append(create_instruction(4, 2, 3, 2, 0, 0))
 
 
 
     cpu = Combinator_CPU()
     cpu.init_basic_signals()
     cpu.init_basic_operations()
+    cpu.artificial_slowdown = 2**30
 
-    for x in instructions:
-        cpu.add_rom_instruction(x)
+    cpu.add_rom_instruction(3, 1, 0, 0, 1, 0)
+    cpu.add_rom_instruction(3, 2, 0, 0, 1, 0)
+    for i in range(30):
+        # cpu.add_rom_instruction(4, 3, 1, 0, 0, 0)
+        # cpu.add_rom_instruction(4, 1, 2, 1, 0, 0)
+        # cpu.add_rom_instruction(4, 2, 3, 2, 0, 0)
 
-    encoded = cpu.assemble_encoded_blueprint()
+        # cpu.add_rom_instruction(3, 3, 1, 2, 0, 0)
+        # cpu.add_rom_instruction(3, 1, 2, 0, 0, 0)
+        # cpu.add_rom_instruction(3, 2, 3, 0, 0, 0)
+
+        cpu.add_rom_instruction(3, i+3, i+2, i+1)
+
+    blueprint = cpu.assemble_blueprint()
 
     # print(encoded)
     with open("new_blueprint.txt", "w") as f:
-        print(encoded, file=f)
+        print(blueprint.to_encoded(), file=f)
     # input()
 
     print("Combinator_CPU assembled")
