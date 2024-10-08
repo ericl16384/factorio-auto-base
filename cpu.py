@@ -178,6 +178,7 @@ def add_RAM_cell(blueprint, x, y, index):
     return combinators
 
 def link_RAM_cells(blueprint, a, b):
+    blueprint.add_connection("green", a["storage"], b["storage"], 1, 1)
     blueprint.add_connection("green", a["writer"], b["writer"], 1, 1)
     blueprint.add_connection("green", a["reada"], b["reada"], 1, 1)
     blueprint.add_connection("green", a["reada"], b["reada"], 2, 2)
@@ -528,99 +529,30 @@ def link_ALU_RAM(blueprint, alu, ram, ram_index):
     blueprint.add_connection("green", alu["ram_interface"]["reada_filter"], ram[ram_index]["reada"], 1, 2)
     blueprint.add_connection("green", alu["ram_interface"]["readb_filter"], ram[ram_index]["readb"], 1, 2)
 
-# def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
-#     blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reada"], 2, 1)
-#     blueprint.add_connection("green", ram[ram_index]["reada"], ram[ram_index]["readb"], 1, 1)
-
-
 
 
 
 
 if __name__ == "__main__":
-    # instructions = [
-    #     # create_instruction(2, 1, 0, 0, 123, 456),
-    #     # create_instruction(6, 5, 4, 3, 2, 1),
-        
-    #     # create_instruction(6, 0, 0, 0, 0, 0),
-    #     # create_instruction(0, 5, 0, 0, 0, 0),
-    #     # create_instruction(0, 0, 4, 0, 0, 0),
-    #     # create_instruction(0, 0, 0, 3, 0, 0),
-    #     # create_instruction(0, 0, 0, 0, 2, 0),
-    #     # create_instruction(0, 0, 0, 0, 0, 1),
-    # ]
-
-
-
-
-    # for i in range(10):
-    #     for j in range(1, 11):
-    #         instructions.append(create_instruction(3, j, 0, 0, i*10+j, 0))
-
-    # for i in range(100):
-    #     instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
-
-
-
-    #     create_instruction(1, 0, 0, 0, 1, 1),
-    #     create_instruction(1, 1, 0, 0, 1, 1),
-    # ]
-
-    # a = 1
-    # b = 1
-    # for i in range(30):
-    #     instructions.append(create_instruction(3, i+3, 0, 0, a, b))
-    #     a, b = b, a+b
-
-    # # instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
-    # # instructions.append(create_instruction(3, 2, 0, 0, 1, 0))
-    # # for j in range(300):
-    # #     i = 0
-    # #     instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
-    # for i in range(30):
-    #     # instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
-
-    #     # fibonacci instructions assuming writes are absolute (they are not)
-    #     # instructions.append(create_instruction(3, 3, 1, 2, 0, 0))
-    #     # instructions.append(create_instruction(3, 1, 2, 0, 0, 0))
-    #     # instructions.append(create_instruction(3, 2, 3, 0, 0, 0))
-
-
-    #     instructions.append(create_instruction(4, 3, 1, 0, 0, 0))
-
-    #     instructions.append(create_instruction(4, 1, 2, 1, 0, 0))
-
-    #     instructions.append(create_instruction(4, 2, 3, 2, 0, 0))
-
-
 
     cpu = Combinator_CPU()
     cpu.init_basic_signals()
     cpu.init_basic_operations()
     cpu.artificial_slowdown = 2**30
 
-    cpu.add_rom_instruction(3, 1, 0, 0, 1, 0)
-    cpu.add_rom_instruction(3, 2, 0, 0, 1, 0)
+    # cpu.add_rom_instruction(3, 1, 0, 0, 1, 0)
+    # cpu.add_rom_instruction(3, 2, 0, 0, 1, 0)
     for i in range(30):
-        # cpu.add_rom_instruction(4, 3, 1, 0, 0, 0)
-        # cpu.add_rom_instruction(4, 1, 2, 1, 0, 0)
-        # cpu.add_rom_instruction(4, 2, 3, 2, 0, 0)
-
         # cpu.add_rom_instruction(3, 3, 1, 2, 0, 0)
         # cpu.add_rom_instruction(3, 1, 2, 0, 0, 0)
         # cpu.add_rom_instruction(3, 2, 3, 0, 0, 0)
 
-        cpu.add_rom_instruction(3, i+3, i+2, i+1)
+        # cpu.add_rom_instruction(3, i+3, i+2, i+1)
+        cpu.add_rom_instruction(3, i+1, 0, 0, 1, 0)
 
     blueprint = cpu.assemble_blueprint()
 
-    # print(encoded)
     with open("new_blueprint.txt", "w") as f:
         print(blueprint.to_encoded(), file=f)
-    # input()
 
     print("Combinator_CPU assembled")
-
-
-
-    # main(instructions)
