@@ -2,6 +2,117 @@ import combinator_operations as co
 import make_blueprint as mb
 
 
+
+class Combinator_System:
+    def __init__(self, combinator_behaviors, wire_links, tick_length) -> None:
+        self.combinator_behaviors = combinator_behaviors
+        self.wire_links = wire_links
+        self.tick_length = tick_length
+
+class Combinator_CPU:
+    def __init__(self) -> None:
+        self.signals = {}
+        self.alu_operations = []
+        self.rom_instructions = []
+        self.ram_size = 0
+        
+        self.EACH_SIGNAL = self.add_signal("each", mb.Signal("signal-each", "virtual"))
+        self.EVERYTHING_SIGNAL = self.add_signal("everything", mb.Signal("signal-everything", "virtual"))
+        self.ANYTHING_SIGNAL = self.add_signal("anything", mb.Signal("signal-anything", "virtual"))
+
+    def add_signal(self, name, signal):
+        assert name not in self.signals, name
+        self.signals[name] = signal
+        return signal
+    
+    def add_alu_operation(self, operation:Combinator_System):
+        self.alu_operations.append(operation)
+    
+    def add_rom_instruction(self, instruction):
+        self.rom_instructions.append(instruction)
+    
+    def init_basic_signals(self):
+        self.add_signal("clock", mb.Signal("signal-T", "virtual"))
+        self.add_signal("program_counter", mb.Signal("signal-I", "virtual"))
+        self.add_signal("opcode", mb.Signal("signal-O", "virtual"))
+        self.add_signal("write", mb.Signal("signal-W", "virtual"))
+        self.add_signal("reada", mb.Signal("signal-A", "virtual"))
+        self.add_signal("readb", mb.Signal("signal-B", "virtual"))
+        self.add_signal("scalara", mb.Signal("signal-X", "virtual"))
+        self.add_signal("scalarb", mb.Signal("signal-Y", "virtual"))
+        self.add_signal("data", mb.Signal("signal-Z", "virtual"))
+        self.add_signal("reset", mb.Signal("signal-R", "virtual"))
+    
+    def init_basic_operations(self):
+        for operation in co.arithmetic:
+            self.add_alu_operation(Combinator_System([
+                [
+                    self.signals["scalara"],
+                    self.signals["data"],
+                    operation,
+                    self.signals["scalarb"]
+                ]
+            ], [], 1))
+    
+    def get_minimum_clock_interval(self):
+        # raise NotImplementedError
+        return 7
+    
+        # for i in self.alu_operations
+
+    def assemble_encoded_blueprint(self):
+        self.blueprint = mb.Blueprint()
+        
+        alu = add_ALU_module(self.blueprint,
+            [op.combinator_behaviors[0] for op in self.alu_operations],
+        0, 0, self.get_minimum_clock_interval())
+
+        # ROM
+        rom = add_ROM_module(self.blueprint, -18, 0, 1, 1, self.rom_instructions)
+        link_ALU_ROM(self.blueprint, alu, rom, 17)
+
+        # RAM
+        ram = add_RAM_module(self.blueprint, 18, 0, 1, 1)
+        link_ALU_RAM(self.blueprint, alu, ram, 0)
+
+        # link_ROM_RAM(blueprint, rom, ram, 103, 18)
+
+
+        return self.blueprint.to_encoded()
+
+    # class Signals:
+    #     def __init__(self) -> None:
+    #         self.registered_signals = {}
+
+    #     def add_signal(self, name, signal):
+    #         self.registered_signals[name] = signal
+    #         return signal
+        
+    #     def init_metasignals(self):
+    #         self.EACH_SIGNAL = self.add_signal("each", mb.Signal("signal-each", "virtual"))
+    #         self.EVERYTHING_SIGNAL = self.add_signal("everything", mb.Signal("signal-everything", "virtual"))
+    #         self.ANYTHING_SIGNAL = self.add_signal("anything", mb.Signal("signal-anything", "virtual"))
+
+    #         # self.remaining_virtual_signals = []
+    #         # self.remaining_virtual_signals.extend("0123456789ABCDEF")
+    #         # self.remaining_virtual_signals.reverse()
+    #         # self.remaining_virtual_signals = [mb.Signal("signal-"+i, "virtual") for i in remaining_virtual_signals]
+
+    #         self.CLOCK_SIGNAL = self.add_signal("clock", mb.Signal("signal-T", "virtual"))
+    #         self.PROGRAM_COUNTER_SIGNAL = self.add_signal("program_counter", mb.Signal("signal-I", "virtual"))
+    #         self.OPCODE_SIGNAL = self.add_signal("opcode", mb.Signal("signal-O", "virtual"))
+
+    #         self.WRITE_SIGNAL = self.add_signal("write", mb.Signal("signal-W", "virtual"))
+    #         self.READA_SIGNAL = self.add_signal("reada", mb.Signal("signal-A", "virtual"))
+    #         self.READB_SIGNAL = self.add_signal("readb", mb.Signal("signal-B", "virtual"))
+    #         self.SCALARA_SIGNAL = self.add_signal("scalara", mb.Signal("signal-X", "virtual"))
+    #         self.SCALARB_SIGNAL = self.add_signal("scalarb", mb.Signal("signal-Y", "virtual"))
+    #         self.RAM_SIGNAL = self.add_signal("scalarb", mb.Signal("signal-Z", "virtual"))
+
+    #         # self.WRITE_PROGRAM_COUNTER_SIGNAL = remaining_virtual_signals.pop()
+    #         # self.CLEAR_MEMORY_SIGNAL = remaining_virtual_signals.pop()
+    #         self.RESET_SIGNAL = self.add_signal("reset", mb.Signal("signal-R", "virtual"))
+
 registered_signals = {}
 def new_sig(name, signal):
     registered_signals[name] = signal
@@ -532,4 +643,24 @@ if __name__ == "__main__":
     for i in range(30):
         instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
 
-    main(instructions)
+
+
+    cpu = Combinator_CPU()
+    cpu.init_basic_signals()
+    cpu.init_basic_operations()
+
+    for x in instructions:
+        cpu.add_rom_instruction(x)
+
+    encoded = cpu.assemble_encoded_blueprint()
+
+    # print(encoded)
+    with open("new_blueprint.txt", "w") as f:
+        print(encoded, file=f)
+    # input()
+
+    print("Combinator_CPU assembled")
+
+
+
+    # main(instructions)
