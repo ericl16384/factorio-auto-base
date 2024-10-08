@@ -66,7 +66,7 @@ def add_RAM_cell(blueprint, x, y, index):
     )))
     offset += 2
 
-    combinators["reader_a"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["reada"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         READA_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
@@ -75,7 +75,7 @@ def add_RAM_cell(blueprint, x, y, index):
     )))
     offset += 2
 
-    combinators["reader_b"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
+    combinators["readb"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+offset+1, mb.LogicCombinatorConditions(
         READB_SIGNAL,
         EVERYTHING_SIGNAL,
         co.EQUAL_TO,
@@ -86,17 +86,17 @@ def add_RAM_cell(blueprint, x, y, index):
 
     blueprint.add_connection("red", combinators["storage"], combinators["storage"], 2, 1)
     blueprint.add_connection("red", combinators["storage"], combinators["writer"], 1, 2)
-    blueprint.add_connection("red", combinators["writer"], combinators["reader_a"], 2, 1)
-    blueprint.add_connection("red", combinators["reader_a"], combinators["reader_b"], 1, 1)
+    blueprint.add_connection("red", combinators["writer"], combinators["reada"], 2, 1)
+    blueprint.add_connection("red", combinators["reada"], combinators["readb"], 1, 1)
 
     return combinators
 
 def link_RAM_cells(blueprint, a, b):
     blueprint.add_connection("green", a["writer"], b["writer"], 1, 1)
-    blueprint.add_connection("green", a["reader_a"], b["reader_a"], 1, 1)
-    blueprint.add_connection("green", a["reader_a"], b["reader_a"], 2, 2)
-    blueprint.add_connection("green", a["reader_b"], b["reader_b"], 1, 1)
-    blueprint.add_connection("green", a["reader_b"], b["reader_b"], 2, 2)
+    blueprint.add_connection("green", a["reada"], b["reada"], 1, 1)
+    blueprint.add_connection("green", a["reada"], b["reada"], 2, 2)
+    blueprint.add_connection("green", a["readb"], b["readb"], 1, 1)
+    blueprint.add_connection("green", a["readb"], b["readb"], 2, 2)
 
 def add_RAM_submodule(blueprint, x, y, length, starting_index):
     cells = []
@@ -191,46 +191,46 @@ def add_ROM_module(blueprint, x, y, width, height, instructions):
     sublength = length//2 - 1
 
     cells = []
-    index = 1
+    index = 0
     for i in range(height):
         # row 1
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18, length, index+1, instructions[index:index+length]))
         if i > 0:
             link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
 
         # row 2
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+3, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+3, length, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
 
         # row 3a (before substation)
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+6, sublength, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+6, sublength, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += sublength
 
         # row 3b (after substation)
-        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+6, sublength, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+6, sublength, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-1])
         index += sublength
 
         # row 4a (before substation)
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+9, sublength, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+9, sublength, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-sublength*2])
         index += sublength
 
         # row 4b (after substation)
-        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+9, sublength, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x+10, y+i*18+9, sublength, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-1])
         index += sublength
 
         # row 5
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+12, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+12, length, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-sublength*2])
         index += length
 
         # row 6
-        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+15, length, index, instructions[index:index+length]))
+        cells.extend(add_ROM_submodule(blueprint, x, y+i*18+15, length, index+1, instructions[index:index+length]))
         link_ROM_cells(blueprint, cells[index], cells[index-length])
         index += length
         
@@ -346,15 +346,6 @@ def add_RAM_interface(blueprint, x, y):
     )))
     offset += 2
     
-    combinators["data_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
-        RAM_SIGNAL,
-        RAM_SIGNAL,
-        co.ADD,
-        0
-    )))
-    blueprint.add_connection("green", combinators["sender"], combinators["data_filter"], 1, 2)
-    offset += 2
-    
     combinators["write_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
         WRITE_SIGNAL,
         WRITE_SIGNAL,
@@ -363,9 +354,39 @@ def add_RAM_interface(blueprint, x, y):
     )))
     blueprint.add_connection("green", combinators["sender"], combinators["write_filter"], 1, 2)
     offset += 2
+    
+    combinators["data_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        RAM_SIGNAL,
+        RAM_SIGNAL,
+        co.ADD,
+        0
+    )))
+    blueprint.add_connection("green", combinators["sender"], combinators["data_filter"], 1, 2)
+    offset += 2
 
-    blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 1, 1)
-    blueprint.add_connection("green", combinators["data_filter"], combinators["write_filter"], 2, 2)
+    blueprint.add_connection("green", combinators["write_filter"], combinators["data_filter"], 1, 1)
+
+
+    # reading
+    
+    combinators["reada_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        RAM_SIGNAL,
+        READA_SIGNAL,
+        co.ADD,
+        0
+    )))
+    offset += 2
+    
+    combinators["readb_filter"] = blueprint.add_entity(mb.ArithmeticCombinator(x+0.5, y+1+offset, mb.LogicCombinatorConditions(
+        RAM_SIGNAL,
+        READB_SIGNAL,
+        co.ADD,
+        0
+    )))
+    offset += 2
+    
+    blueprint.add_connection("green", combinators["data_filter"], combinators["reada_filter"], 1, 1)
+    blueprint.add_connection("green", combinators["reada_filter"], combinators["readb_filter"], 1, 1)
 
 
     return combinators
@@ -383,7 +404,7 @@ def add_ALU_module(blueprint, opcodes, x, y, clock_interval):
         if i > 0:
             link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
         
-    blueprint.add_connection("green", blocks["ram_interface"]["data_filter"], blocks["operations"][10]["indexer"], 1, 2)
+    blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["indexer"], 1, 2)
 
     blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
     blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["sender"], 2, 1)
@@ -401,10 +422,12 @@ def link_ALU_ROM(blueprint, alu, rom, rom_index):
 
 def link_ALU_RAM(blueprint, alu, ram, ram_index):
     blueprint.add_connection("green", alu["ram_interface"]["sender"], ram[ram_index]["writer"], 2, 1)
+    blueprint.add_connection("green", alu["ram_interface"]["reada_filter"], ram[ram_index]["reada"], 1, 2)
+    blueprint.add_connection("green", alu["ram_interface"]["readb_filter"], ram[ram_index]["readb"], 1, 2)
 
 # def link_ROM_RAM(blueprint, rom, ram, rom_index, ram_index):
-#     blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reader_a"], 2, 1)
-#     blueprint.add_connection("green", ram[ram_index]["reader_a"], ram[ram_index]["reader_b"], 1, 1)
+#     blueprint.add_connection("green", rom[rom_index]["reader"], ram[ram_index]["reada"], 2, 1)
+#     blueprint.add_connection("green", ram[ram_index]["reada"], ram[ram_index]["readb"], 1, 1)
 
 
 
@@ -420,7 +443,7 @@ def main(program_instructions):
 
     blueprint = mb.Blueprint()
 
-    clock_interval = 600
+    clock_interval = 60
 
     # ALU
     opcodes = [
@@ -477,8 +500,8 @@ if __name__ == "__main__":
     #     for j in range(1, 11):
     #         instructions.append(create_instruction(3, j, 0, 0, i*10+j, 0))
 
-    for i in range(100):
-        instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
+    # for i in range(100):
+    #     instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
 
 
 
@@ -491,5 +514,10 @@ if __name__ == "__main__":
     # for i in range(30):
     #     instructions.append(create_instruction(3, i+3, 0, 0, a, b))
     #     a, b = b, a+b
+
+    instructions.append(create_instruction(3, 1, 0, 0, 1, 0))
+    instructions.append(create_instruction(3, 2, 0, 0, 1, 0))
+    for i in range(30):
+        instructions.append(create_instruction(3, i+3, i+2, i+1, 0, 0))
 
     main(instructions)
