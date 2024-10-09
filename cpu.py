@@ -74,7 +74,7 @@ class Combinator_CPU:
     def assemble_blueprint(self):
         self.blueprint = mb.Blueprint()
         
-        alu = add_core_module(self.blueprint,
+        alu = add_controller_module(self.blueprint,
             [op.combinator_behaviors[0] for op in self.alu_operations],
         18, 0, self.get_minimum_clock_interval())
 
@@ -391,7 +391,7 @@ def add_clock(blueprint, x, y, clock_interval):
 
     combinators["clock"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5+offset, y+1, mb.LogicCombinatorConditions(
         CLOCK_SIGNAL,
-        CLOCK_SIGNAL,
+        PROGRAM_COUNTER_SIGNAL,
         co.EQUAL_TO,
         RAM_SIGNAL
     )))
@@ -491,12 +491,24 @@ def add_RAM_interface(blueprint, x, y):
 
     return combinators
 
-def add_core_module(blueprint, opcodes, x, y, clock_interval):
+def add_controller_module(blueprint, opcodes, x, y, clock_interval):
     blocks = {}
 
-    blocks["rom_interface"] = add_ROM_interface(blueprint, x, y)
+    blocks["controller"] = {}
+
+    blocks["controller"]["program_counter_register"] = blueprint.add_entity(mb.DeciderCombinator(x+0.5, y+1, mb.LogicCombinatorConditions(
+        RESET_SIGNAL,
+        PROGRAM_COUNTER_SIGNAL,
+        co.EQUAL_TO,
+        0,
+        True
+    )))
+    # blueprint.add_connection("green", blocks["controller"]["accumulator_register"], blocks["controller"]["accumulator_register"], 1, 2)
+    # offset += 1
+
+    # blocks["rom_interface"] = add_ROM_interface(blueprint, x, y)
     blocks["clock"] = add_clock(blueprint, x+8, y, clock_interval)
-    blocks["ram_interface"] = add_RAM_interface(blueprint, x+17, y)
+    # blocks["ram_interface"] = add_RAM_interface(blueprint, x+17, y)
 
     blocks["operations"] = []
     for i, opcode in enumerate(opcodes):
@@ -504,10 +516,10 @@ def add_core_module(blueprint, opcodes, x, y, clock_interval):
         if i > 0:
             link_ALU_cells(blueprint, blocks["operations"][-1], blocks["operations"][-2])
         
-    blueprint.add_connection("green", blocks["ram_interface"]["data_filter"], blocks["operations"][10]["indexer"], 1, 2)
-    blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["operator"], 1, 1)
+    # blueprint.add_connection("green", blocks["ram_interface"]["data_filter"], blocks["operations"][10]["indexer"], 1, 2)
+    # blueprint.add_connection("green", blocks["ram_interface"]["write_filter"], blocks["operations"][10]["operator"], 1, 1)
 
-    blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
+    # blueprint.add_connection("red", blocks["clock"]["clock"], blocks["rom_interface"]["program_counter_increment"], 2, 1)
     # blueprint.add_connection("red", blocks["clock"]["clock"], blocks["ram_interface"]["resetter"], 2, 1)
 
     blueprint.add_entity(mb.Substation(x+9, y+9))
@@ -517,7 +529,7 @@ def add_core_module(blueprint, opcodes, x, y, clock_interval):
 
 
 def link_ALU_ROM(blueprint, alu, rom, rom_index):
-    blueprint.add_connection("green", alu["rom_interface"]["accumulator_register"], rom[rom_index]["reader"], 1, 1)
+    # blueprint.add_connection("green", alu["rom_interface"]["accumulator_register"], rom[rom_index]["reader"], 1, 1)
     blueprint.add_connection("green", alu["operations"][0]["operator"], rom[rom_index]["reader"], 1, 2)
     blueprint.add_connection("green", alu["operations"][0]["indexer"], rom[rom_index]["reader"], 1, 2)
 
@@ -525,18 +537,20 @@ def link_ALU_RAM(blueprint, alu, ram, ram_index):
     # blueprint.add_connection("green", alu["ram_interface"]["resetter"], ram[ram_index]["storage"], 2, 1)
     # blueprint.add_connection("green", alu["ram_interface"]["writer"], ram[ram_index]["writer"], 2, 1)
     
-    blueprint.add_connection("green", ram[ram_index]["writer"], alu["ram_interface"]["write_filter"], 1, 2)
+    # blueprint.add_connection("green", ram[ram_index]["writer"], alu["ram_interface"]["write_filter"], 1, 2)
 
-    blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["data_filter"], 1, 1)
-    blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["data_filter"], 1, 1)
+    # blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["data_filter"], 1, 1)
+    # blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["data_filter"], 1, 1)
 
-    blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["reada_filter"], 2, 1)
-    blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["readb_filter"], 2, 1)
+    # blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["reada_filter"], 2, 1)
+    # blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["readb_filter"], 2, 1)
 
     # blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["write_filter"], 1, 1)
     # blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["write_filter"], 1, 1)
     # blueprint.add_connection("green", ram[ram_index]["reada"], alu["ram_interface"]["reada_filter"], 2, 1)
     # blueprint.add_connection("green", ram[ram_index]["readb"], alu["ram_interface"]["readb_filter"], 2, 1)
+
+    pass
 
 
 

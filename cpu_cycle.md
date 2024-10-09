@@ -40,6 +40,8 @@ change  change of stable signal
 
 ## systems
 ```
+clock       pc=1; repeating interval
+
 counter in  (pc)
 counter out (pc, ...)
 
@@ -62,8 +64,8 @@ mux in      (opcode, outa)
 mux out     (outa)
 
 CREATION NEEDED
-atob in     (ina)
-atob out    (inb)
+writer in   (ina, pc=1)
+writer out  (ina, inb)
 
 writea in   (*, writea, ina, inb)
 writea val  (*, writea, ina, inb, ...)
